@@ -15,6 +15,9 @@ Todo
 """
 
 def getHostIp():
+    string ipOutput = os.popen('ifconfig','r',1)
+
+    print ipOutput
     address = None # declare
     # todo
 
