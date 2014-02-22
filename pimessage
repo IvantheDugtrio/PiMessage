@@ -1,7 +1,7 @@
 #!/usr/bin/python
 
 # for function calls
-import os
+import subprocess
 ## make sure indents are 4 spaces if possible
 ## vim settings:
 ##              set et
@@ -19,6 +19,8 @@ def getHostIp():
 
     print ipOutput
     address = None # declare
+    address = subprocess.Popen('ifconfig', stdout=subprocess.PIPE).communicate()[0]
+    print address
     # todo
 
     return address
