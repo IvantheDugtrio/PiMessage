@@ -1,8 +1,9 @@
 #!/usr/bin/python
 
-# for function calls
-import subprocess
+import subprocess # for function calls
 import os
+import string
+
 ## make sure indents are 4 spaces if possible
 ## vim settings:
 ##              set et
@@ -24,10 +25,32 @@ def getHostIp():
     return address
 
 
-def welcomeScreen(ip):
-    print("Welcome to piMessage")
-    print "Your IP Address is:", ip
-    # implement
+def welcomeScreen(ip, width):
+    # clear screen
+    os.system('clear')
+
+    print(string.center("Welcome to piMessage", width))
+    print("")
+
+    # Raspberry Pi logo
+    print(string.center(".~~.   .~~.", width))
+    print(string.center("'. \ ' ' / .'", width))
+    print(string.center(".~ .~~~..~.", width))
+    print(string.center(": .~.'~'.~. :", width))
+    print(string.center("~ (   ) (   ) ~", width))
+    print(string.center("( : '~'.~.'~' : )", width))
+    print(string.center("~ .~ (   ) ~. ~", width))
+    print(string.center("(  : '~' :  )", width))
+    print(string.center("'~ .~~~. ~'", width))
+    print(string.center("'~'", width))
+    print("")
+    print("    To connect to a friend, exchange IP addresses with them.")
+    #print "    Your IP Address is:", ip
+
+
+    print("")
+    raw_input("Press enter to continue... ")
+    return 0
 
 
 
@@ -66,10 +89,18 @@ def main():
 
     hostIp = getHostIp()
 
+    # get number of rows and number of columns on terminal
+    screenRows, screenColumns = os.popen('stty size', 'r').read().split()
+    screenRows = int(screenRows)
+    screenColumns = int(screenColumns)
 
     # User must already have information entered
 
-    welcomeScreen(hostIp)
+    print "screenColumns is", screenColumns
+    keyPress = welcomeScreen(hostIp, screenColumns)
+
+
+
     # implement
 
     mainScreen()
