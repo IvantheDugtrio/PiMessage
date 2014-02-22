@@ -1,5 +1,7 @@
 #!/usr/bin/python
 
+# for function calls
+import os
 ## make sure indents are 4 spaces if possible
 ## vim settings:
 ##              set et
@@ -12,8 +14,16 @@ Todo
 
 """
 
+def getHostIp():
+    address = None # declare
+    # todo
+
+    return address
+
+
 def welcomeScreen():
     print("Welcome to piMessage")
+    ipaddress = getHostIp()
     # implement
 
 
