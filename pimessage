@@ -2,6 +2,7 @@
 
 # for function calls
 import subprocess
+import os
 ## make sure indents are 4 spaces if possible
 ## vim settings:
 ##              set et
@@ -17,32 +18,58 @@ Todo
 def getHostIp():
     address = None # declare
     address = subprocess.Popen('ifconfig', stdout=subprocess.PIPE).communicate()[0]
-    print address
+    #print address
     # todo
 
     return address
 
 
-def welcomeScreen():
+def welcomeScreen(ip):
     print("Welcome to piMessage")
-    ipaddress = getHostIp()
+    print "Your IP Address is:", ip
     # implement
 
 
 
 def sendMessage():
-    print("") # must have at least one line
     # todo
+    return 0
 
 def mainScreen():
     # displays various conversations like texting apps do
     # perhaps displays a snippet of the last message with that person
-    print("Hello")
+    
+    # todo
+    return 0
+
+def initNewUser(user):
+    # make the directory
+    mdCommand = "mkdir /home/" + user + "/.pimessage/"
+    result = os.system(mdCommand)
+    if result != 0:
+        print("Error!")
+    # write info to files
+
+
+    return result
 
 
 
 def main():
-    welcomeScreen()
+    ## Get user information ##
+    username = subprocess.Popen('whoami', stdout=subprocess.PIPE).communicate()[0]
+    username = username.rstrip('\n') # removes trailing newline
+    dataDir = "/home/" + username + "/.pimessage/"
+    dirExistsCommand = "test -d " + dataDir
+    if os.system(dirExistsCommand) != 0:
+        initNewUser(username)
+
+    hostIp = getHostIp()
+
+
+    # User must already have information entered
+
+    welcomeScreen(hostIp)
     # implement
 
     mainScreen()
