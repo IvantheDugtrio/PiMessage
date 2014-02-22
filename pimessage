@@ -1,0 +1,50 @@
+#!/usr/bin/python
+
+## make sure indents are 4 spaces if possible
+## vim settings:
+##              set et
+##              set ts=4
+
+"""
+Docmentation section.
+
+Todo
+
+"""
+
+def welcomeScreen():
+    print("Welcome to piMessage")
+    # implement
+
+
+
+def sendMessage():
+    print("") # must have at least one line
+    # todo
+
+def mainScreen():
+    # displays various conversations like texting apps do
+    # perhaps displays a snippet of the last message with that person
+    print("Hello")
+
+
+
+def main():
+    welcomeScreen()
+    # implement
+
+    mainScreen()
+
+
+
+
+
+
+
+
+
+
+if __name__ == "__main__":
+    main()
+
+exit(0)
