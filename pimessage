@@ -15,13 +15,25 @@ Todo
 """
 
 def getHostIp():
-    string ipOutput = os.popen('ifconfig','r',1)
-
-    print ipOutput
     address = None # declare
     address = subprocess.Popen('ifconfig', stdout=subprocess.PIPE).communicate()[0]
     print address
-    # todo
+
+    exit = 0
+
+    while (exit == 0):
+        if (address.find('i')):
+            if (address.find('n')):
+                if (address.find('e')):
+                    if (address.find('t')):
+                        ipIndex = address.index('t')
+                        exit = 1
+    if (exit == 1):
+        ipIndex += 7
+        print ipIndex
+
+    ipAddress = None # declare
+
 
     return address
 
