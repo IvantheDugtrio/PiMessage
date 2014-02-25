@@ -3,7 +3,9 @@
 import subprocess # for function calls
 import os
 import string
+import re # for searching
 
+IP_FAILURE = "NULL"
 ## make sure indents are 4 spaces if possible
 ## vim settings:
 ##              set et
@@ -17,12 +19,44 @@ Todo
 """
 
 def getHostIp():
-    address = None # declare
-    address = subprocess.Popen('ifconfig', stdout=subprocess.PIPE).communicate()[0]
-    #print address
-    # todo
+    # returns IP_FAILURE if no address was found
 
-    return address
+    ipaddress = IP_FAILURE # default case
+    cmdOutput = subprocess.Popen('ifconfig', stdout=subprocess.PIPE).communicate()[0]
+    #print cmdOutput
+
+
+    inetsub = cmdOutput.find("inet")
+    if (inetsub == -1): # not connected to internet
+        return IP_FAILURE
+    
+    # slice the cmdOutput string:
+    modifiedOutput = cmdOutput[inetsub:]
+
+    colonsub = modifiedOutput.find(':')
+    if (colonsub == -1): # not connected to internet
+        return IP_FAILURE
+    
+    # slice the cmdOutput string:
+    modifiedOutput = modifiedOutput[colonsub+1:]
+
+
+
+    ## perhaps there is a good way to clean this up? ##
+    match_object = re.search('\d', modifiedOutput)
+    if match_object: # it returned a match
+        startSub = match_object.start()
+    else:
+        return IP_FAILURE
+    
+    match_object = re.search(' ', modifiedOutput)
+    if match_object: # it returned a match
+        endSub = match_object.start()
+    else:
+        return IP_FAILURE
+
+    ipaddress = modifiedOutput[startSub:endSub-1]
+    return ipaddress # default is IP_FAILURE
 
 
 def welcomeScreen(ip, width):
