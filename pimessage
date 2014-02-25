@@ -78,8 +78,10 @@ def welcomeScreen(ip, width):
     print(string.center("'~ .~~~. ~'", width))
     print(string.center("'~'", width))
     print("")
-    print("    To connect to a friend, exchange IP addresses with them.")
-    #print "    Your IP Address is:", ip
+
+    ipString = "Your IP Address is: "+ip
+    print(ipString.center(width))
+    print(string.center("To connect to a friend, exchange IP addresses with them.", width))
 
 
     print("")
@@ -130,7 +132,6 @@ def main():
 
     # User must already have information entered
 
-    print "screenColumns is", screenColumns
     keyPress = welcomeScreen(hostIp, screenColumns)
 
 
