@@ -1,22 +1,28 @@
 #!/usr/bin/python
 
+"""
+A messaging program between two Linux systems, optimized for the raspberry
+pi running raspbian OS.
+
+2014 Nate Fischer, Ivan De Dios
+
+"""
+
 import subprocess # for function calls
 import os
 import string
 import re # for searching
 
-IP_FAILURE = "NULL"
+IP_FAILURE = 1
+
 ## make sure indents are 4 spaces if possible
 ## vim settings:
 ##              set et
 ##              set ts=4
 
-"""
-Docmentation section.
+## perhaps an IPaddress class? This would mean changing some variable names
 
-Todo
 
-"""
 
 def getHostIp():
     # returns IP_FAILURE if no address was found
@@ -29,18 +35,16 @@ def getHostIp():
     inetsub = cmdOutput.find("inet")
     if (inetsub == -1): # not connected to internet
         return IP_FAILURE
-    
+
     # slice the cmdOutput string:
     modifiedOutput = cmdOutput[inetsub:]
 
     colonsub = modifiedOutput.find(':')
     if (colonsub == -1): # not connected to internet
         return IP_FAILURE
-    
+
     # slice the cmdOutput string:
     modifiedOutput = modifiedOutput[colonsub+1:]
-
-
 
     ## perhaps there is a good way to clean this up? ##
     match_object = re.search('\d', modifiedOutput)
@@ -48,7 +52,7 @@ def getHostIp():
         startSub = match_object.start()
     else:
         return IP_FAILURE
-    
+
     match_object = re.search(' ', modifiedOutput)
     if match_object: # it returned a match
         endSub = match_object.start()
@@ -97,26 +101,32 @@ def sendMessage():
 def mainScreen():
     # displays various conversations like texting apps do
     # perhaps displays a snippet of the last message with that person
-    
+
     # todo
     return 0
 
 def initNewUser(user):
     # make the directory
     mdCommand = "mkdir /home/" + user + "/.pimessage/"
-    result = os.system(mdCommand)
-    if result != 0:
+    returner = os.system(mdCommand)
+    if returner != 0:
         print("Error!")
+
+    # generate user's keys
+
+
     # write info to files
 
 
-    return result
+    return returner
 
 
 
 def main():
     ## Get user information ##
     username = subprocess.Popen('whoami', stdout=subprocess.PIPE).communicate()[0]
+    # fails for non-unix systems
+
     username = username.rstrip('\n') # removes trailing newline
     dataDir = "/home/" + username + "/.pimessage/"
     dirExistsCommand = "test -d " + dataDir
@@ -151,5 +161,4 @@ def main():
 
 if __name__ == "__main__":
     main()
-
-exit(0)
+    exit(0)
