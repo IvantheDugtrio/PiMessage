@@ -13,7 +13,13 @@ import os
 import string
 import re # for searching
 
+########################
+##  Global constants  ##
+########################
+
 IP_FAILURE = 1
+DIR_FAILURE = 2
+
 
 ## make sure indents are 4 spaces if possible
 ## vim settings:
@@ -22,6 +28,12 @@ IP_FAILURE = 1
 
 ## perhaps an IPaddress class? This would mean changing some variable names
 
+
+def mdUnix(name):
+    if os.system("mkdir " + name) != 0:
+        return DIR_FAILURE
+    else:
+        return 0
 
 
 def getHostIp():
@@ -71,22 +83,21 @@ def welcomeScreen(ip, width):
     print("")
 
     # Raspberry Pi logo
-    print(string.center(".~~.   .~~.", width))
-    print(string.center("'. \ ' ' / .'", width))
-    print(string.center(".~ .~~~..~.", width))
-    print(string.center(": .~.'~'.~. :", width))
-    print(string.center("~ (   ) (   ) ~", width))
+    print(string.center("   .~~.   .~~.   ", width))
+    print(string.center("  '. \ ' ' / .'  ", width))
+    print(string.center("   .~ .~~~..~.   ", width))
+    print(string.center("  : .~.'~'.~. :  ", width))
+    print(string.center(" ~ (   ) (   ) ~ ", width))
     print(string.center("( : '~'.~.'~' : )", width))
-    print(string.center("~ .~ (   ) ~. ~", width))
-    print(string.center("(  : '~' :  )", width))
-    print(string.center("'~ .~~~. ~'", width))
-    print(string.center("'~'", width))
+    print(string.center(" ~ .~ (   ) ~. ~ ", width))
+    print(string.center("  (  : '~' :  )  ", width))
+    print(string.center("   '~ .~~~. ~'   ", width))
+    print(string.center("       '~'       ", width))
     print("")
 
     ipString = "Your IP Address is: "+ip
     print(ipString.center(width))
     print(string.center("To connect to a friend, exchange IP addresses with them.", width))
-
 
     print("")
     raw_input("Press enter to continue... ")
@@ -105,20 +116,24 @@ def mainScreen():
     # todo
     return 0
 
-def initNewUser(user):
+def initNewUser(user, homedir):
     # make the directory
-    mdCommand = "mkdir /home/" + user + "/.pimessage/"
-    returner = os.system(mdCommand)
-    if returner != 0:
-        print("Error!")
+    if mdUnix(homedir) == DIR_FAILURE:
+        exit(DIR_FAILURE)
+    
 
     # generate user's keys
 
 
     # write info to files
+    fEd = open(homedir+"editor", 'w')
+    fEd.write("vim") # doesn't terminate in newline
+
+    if mdUnix(homedir+"conversations/") == DIR_FAILURE:
+        exit(DIR_FAILURE)
 
 
-    return returner
+    return 0
 
 
 
@@ -131,9 +146,11 @@ def main():
     dataDir = "/home/" + username + "/.pimessage/"
     dirExistsCommand = "test -d " + dataDir
     if os.system(dirExistsCommand) != 0:
-        initNewUser(username)
+        initNewUser(username, dataDir)
 
     hostIp = getHostIp()
+    fEditor = open(dataDir+"editor", 'r')
+    editor = fEditor.read()
 
     # get number of rows and number of columns on terminal
     screenRows, screenColumns = os.popen('stty size', 'r').read().split()
