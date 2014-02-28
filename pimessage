@@ -120,17 +120,19 @@ def initNewUser(user, homedir):
     # make the directory
     if mdUnix(homedir) == DIR_FAILURE:
         exit(DIR_FAILURE)
-    
+
 
     # generate user's keys
+    # todo
 
 
     # write info to files
-    fEd = open(homedir+"editor", 'w')
-    fEd.write("vim") # doesn't terminate in newline
+    open(homedir+"editor", 'w').write("vim") # doesn't terminate in newline
 
     if mdUnix(homedir+"conversations/") == DIR_FAILURE:
         exit(DIR_FAILURE)
+    # change permissions of conversations
+    os.system("chmod 700 " + homedir + "conversations/")
 
 
     return 0
@@ -149,15 +151,15 @@ def main():
         initNewUser(username, dataDir)
 
     hostIp = getHostIp()
-    fEditor = open(dataDir+"editor", 'r')
-    editor = fEditor.read()
+    editCommand = open(dataDir+"editor", 'r').read()
 
     # get number of rows and number of columns on terminal
     screenRows, screenColumns = os.popen('stty size', 'r').read().split()
     screenRows = int(screenRows)
     screenColumns = int(screenColumns)
 
-    # User must already have information entered
+
+    ## User must already have information entered
 
     keyPress = welcomeScreen(hostIp, screenColumns)
 
