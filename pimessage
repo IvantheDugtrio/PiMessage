@@ -10,16 +10,11 @@ pi running raspbian OS.
 
 import subprocess # for function calls
 import os
+import sys # for arg parsing
 import string
 import re # for searching
-
-########################
-##  Global constants  ##
-########################
-
-IP_FAILURE = 1
-DIR_FAILURE = 2
-
+#from optparse import OptionParser
+#import argparse
 
 ## make sure indents are 4 spaces if possible
 ## vim settings:
@@ -29,11 +24,72 @@ DIR_FAILURE = 2
 ## perhaps an IPaddress class? This would mean changing some variable names
 
 
+########################
+##  Global constants  ##
+########################
+
+IP_FAILURE = 1
+DIR_FAILURE = 2
+
+
+########################
+##  Helper functions  ##
+########################
 def mdUnix(name):
     if os.system("mkdir " + name) != 0:
         return DIR_FAILURE
     else:
         return 0
+
+def initNewUser(user, homedir):
+    # make the directory
+    if mdUnix(homedir) == DIR_FAILURE:
+        exit(DIR_FAILURE)
+
+
+    # generate user's keys
+    # todo
+
+
+    # write info to files
+    open(homedir+"editor", 'w').write("vim") # doesn't terminate in newline
+
+    if mdUnix(homedir+"conversations/") == DIR_FAILURE:
+        exit(DIR_FAILURE)
+    # change permissions of conversations
+    os.system("chmod 700 " + homedir + "conversations/")
+
+
+    return 0
+
+########################
+##  Option functions  ##
+########################
+
+def usage(scriptName):
+    # Prints usage/help information
+    # This is called by --help, -h, or invalid usage
+
+    # print usage info
+    print "Usage: %s [options] [option arguments]" % scriptName
+
+    # print help/option info
+    # Don't indent on docstring
+    optionMsg = """Options:
+-i , --show-ip                   Show your IP address
+-s , --history                   Show your recent chat history
+-c , --compose     CONTACT       Compose & send message
+-r , --read        CONTACT       Read a conversation
+-d , --delete      CONTACT       Delete a conversation
+-q , --resend      CONTACT       Resend a failed message
+-h , --help                      Help
+-f , --force-link  CONTACT, IP   Specify the IP address to try for CONTACT
+
+    """
+
+    print(optionMsg)
+
+    return # exit after calling this function
 
 
 def getHostIp():
@@ -75,71 +131,109 @@ def getHostIp():
     return ipaddress # default is IP_FAILURE
 
 
-def welcomeScreen(ip, width):
-    # clear screen
-    os.system('clear')
+#def welcomeScreen(ip, width):
+#    # clear screen
+#    os.system('clear')
+#
+#    print(string.center("Welcome to piMessage", width))
+#    print("")
+#
+#    # Raspberry Pi logo
+#    print(string.center("   .~~.   .~~.   ", width))
+#    print(string.center("  '. \ ' ' / .'  ", width))
+#    print(string.center("   .~ .~~~..~.   ", width))
+#    print(string.center("  : .~.'~'.~. :  ", width))
+#    print(string.center(" ~ (   ) (   ) ~ ", width))
+#    print(string.center("( : '~'.~.'~' : )", width))
+#    print(string.center(" ~ .~ (   ) ~. ~ ", width))
+#    print(string.center("  (  : '~' :  )  ", width))
+#    print(string.center("   '~ .~~~. ~'   ", width))
+#    print(string.center("       '~'       ", width))
+#    print("")
+#
+#    ipString = "Your IP Address is: "+ip
+#    print(ipString.center(width))
+#    print(string.center("To connect to a friend, exchange IP addresses with them.", width))
+#
+#    print("")
+#    raw_input("Press enter to continue... ")
+#    return 0
 
-    print(string.center("Welcome to piMessage", width))
-    print("")
-
-    # Raspberry Pi logo
-    print(string.center("   .~~.   .~~.   ", width))
-    print(string.center("  '. \ ' ' / .'  ", width))
-    print(string.center("   .~ .~~~..~.   ", width))
-    print(string.center("  : .~.'~'.~. :  ", width))
-    print(string.center(" ~ (   ) (   ) ~ ", width))
-    print(string.center("( : '~'.~.'~' : )", width))
-    print(string.center(" ~ .~ (   ) ~. ~ ", width))
-    print(string.center("  (  : '~' :  )  ", width))
-    print(string.center("   '~ .~~~. ~'   ", width))
-    print(string.center("       '~'       ", width))
-    print("")
-
-    ipString = "Your IP Address is: "+ip
-    print(ipString.center(width))
-    print(string.center("To connect to a friend, exchange IP addresses with them.", width))
-
-    print("")
-    raw_input("Press enter to continue... ")
-    return 0
 
 
-
-def sendMessage():
+def sendMessage(myContact):
     # todo
     return 0
 
-def mainScreen():
-    # displays various conversations like texting apps do
-    # perhaps displays a snippet of the last message with that person
 
-    # todo
-    return 0
+########################
+##   Main function    ##
+########################
 
-def initNewUser(user, homedir):
-    # make the directory
-    if mdUnix(homedir) == DIR_FAILURE:
-        exit(DIR_FAILURE)
+def main(argv):
+
+    ## Option parsing ##
+    scriptName = argv[0]
+    if len(argv) <= 1:
+        # only contains the script name, no arguments
+        # call usage function
+        usage(scriptName)
+        exit(1)
+
+    primOpt = argv[1]
+
+    # figure out which option was called
+
+#+ show host IP address         | -i , --show-ip    | ---
+#+ show recent chat history     | -s , --history    | ---
+#+ compose & send message       | -c , --compose    | Name
+#+ read a conversation          | -r , --read       | Person's_Name
+#+ delete a conversation        | -d , --delete     | Person's_Name
+#+ resend a failed message      | -q , --resend     | Person's_Name
+#+ help                         | -h , --help       | ---
+#+ force-link contact to IP     | -f , --force-link | Person's_Name, IP
+
+    #           short opt           long opt
+    if primOpt == "-h" or primOpt == "--help":
+        usage(scriptName)
+        exit(0)
+    elif primOpt == "-i" or primOpt == "--show-ip":
+        UserIp = getHostIp()
+        if UserIp != IP_FAILURE:
+            print UserIp
+            exit(0)
+        else:
+            print "Error getting your IP address. Exiting."
+            exit(1)
+    elif primOpt == "-s" or primOpt == "-history":
+        print("Under construction.")
+        exit(3)
+    elif primOpt == "-c" or primOpt == "--compose":
+        print("Under construction.")
+        exit(3)
+    elif primOpt == "-r" or primOpt == "--read":
+        print("Under construction.")
+        exit(3)
+    elif primOpt == "-d" or primOpt == "--delete":
+        print("Under construction.")
+        exit(3)
+    elif primOpt == "-q" or primOpt == "--resend":
+        print("Under construction.")
+        exit(3)
+    elif primOpt == "-f" or primOpt == "--force-link":
+        print("Under construction.")
+        exit(3)
+# for other options
+#    elif primOpt == "-q" or primOpt == "--resend":
+#        print("Under construction.")
+#        exit(3)
+    else:
+        # some invalid option
+        print "Invalid option %s" % primOpt
+        usage(scriptName)
+        exit(1)
 
 
-    # generate user's keys
-    # todo
-
-
-    # write info to files
-    open(homedir+"editor", 'w').write("vim") # doesn't terminate in newline
-
-    if mdUnix(homedir+"conversations/") == DIR_FAILURE:
-        exit(DIR_FAILURE)
-    # change permissions of conversations
-    os.system("chmod 700 " + homedir + "conversations/")
-
-
-    return 0
-
-
-
-def main():
     ## Get user information ##
     username = subprocess.Popen('whoami', stdout=subprocess.PIPE).communicate()[0]
     # fails for non-unix systems
@@ -154,20 +248,16 @@ def main():
     editCommand = open(dataDir+"editor", 'r').read()
 
     # get number of rows and number of columns on terminal
-    screenRows, screenColumns = os.popen('stty size', 'r').read().split()
-    screenRows = int(screenRows)
-    screenColumns = int(screenColumns)
+    #screenRows, screenColumns = os.popen('stty size', 'r').read().split()
+    #screenRows = int(screenRows)
+    #screenColumns = int(screenColumns)
 
 
     ## User must already have information entered
 
-    keyPress = welcomeScreen(hostIp, screenColumns)
+    #keyPress = welcomeScreen(hostIp, screenColumns)
 
 
-
-    # implement
-
-    mainScreen()
 
 
 
@@ -179,5 +269,5 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    main(sys.argv)
     exit(0)
