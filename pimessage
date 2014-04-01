@@ -30,6 +30,7 @@ import re # for searching
 
 IP_FAILURE = 1
 DIR_FAILURE = 2
+NULL_ARGUMENT = "."
 
 
 ########################
@@ -61,6 +62,13 @@ def initNewUser(user, homedir):
 
 
     return 0
+
+def grabOpt(argv, n):
+    # returns the nth arg or returns NULL_ARGUMENT
+    if len(argv) <= n:
+        return NULL_ARGUMENT
+    else:
+        return argv[n]
 
 ########################
 ##  Option functions  ##
@@ -174,13 +182,14 @@ def main(argv):
 
     ## Option parsing ##
     scriptName = argv[0]
-    if len(argv) <= 1:
+    secOpt = grabOpt(argv, 2)
+    primOpt = grabOpt(argv, 1)
+
+    if primOpt == NULL_ARGUMENT:
         # only contains the script name, no arguments
         # call usage function
         usage(scriptName)
         exit(1)
-
-    primOpt = argv[1]
 
     # figure out which option was called
 
@@ -205,22 +214,58 @@ def main(argv):
         else:
             print "Error getting your IP address. Exiting."
             exit(1)
+
     elif primOpt == "-s" or primOpt == "-history":
         print("Under construction.")
         exit(3)
     elif primOpt == "-c" or primOpt == "--compose":
+        if secOpt == NULL_ARGUMENT:
+            print "Invalid number of operands for %s option" % primOpt
+            usage(scriptName)
+            exit(1)
+
+        print "second option is", secOpt
         print("Under construction.")
         exit(3)
+
     elif primOpt == "-r" or primOpt == "--read":
+        if secOpt == NULL_ARGUMENT:
+            print "Invalid number of operands for %s option" % primOpt
+            usage(scriptName)
+            exit(1)
+
+        print "second option is", secOpt
         print("Under construction.")
         exit(3)
     elif primOpt == "-d" or primOpt == "--delete":
+        if secOpt == NULL_ARGUMENT:
+            print "Invalid number of operands for %s option" % primOpt
+            usage(scriptName)
+            exit(1)
+
+        print "second option is", secOpt
         print("Under construction.")
         exit(3)
     elif primOpt == "-q" or primOpt == "--resend":
+        if secOpt == NULL_ARGUMENT:
+            print "Invalid number of operands for %s option" % primOpt
+            usage(scriptName)
+            exit(1)
+
+        print "second option is", secOpt
         print("Under construction.")
         exit(3)
     elif primOpt == "-f" or primOpt == "--force-link":
+        thirdOpt = grabOpt(argv, 3)
+
+        if thirdOpt == NULL_ARGUMENT:
+            print "Invalid number of operands for %s option" % primOpt
+            usage(scriptName)
+            exit(1)
+
+        print "second option is", secOpt
+        print "third option is", thirdOpt
+
         print("Under construction.")
         exit(3)
 # for other options
