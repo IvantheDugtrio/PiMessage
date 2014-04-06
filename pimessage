@@ -95,31 +95,33 @@ def parseOpts(argv):
 
     """
     Commands:                       | Options           | Arguments
+     + help                         | help, -h, --help  | ---
      + show host IP address         | show              | ---
+
      + show recent chat history     | history           | ---
      + compose & send message       | compose, new      | Name
      + read a conversation          | read              | Person's_Name
      + delete a conversation        | rm-convo          | Person's_Name
      + resend a failed message      | resend            | Person's_Name
-     + help                         | help, -h, --help  | ---
      + force-link contact to IP     | force-link        | Person's_Name, IP
      + configure varialbles         | config            | varName, varValue
+
      + view contact list            | contacts          | ---
      + add a contact                | add               | Person's_Name, IP
      + delete a contact             | rm-contact        | Person's_Name
     """
 
     #           short opt           long opt
-    if primOpt == "-h" or primOpt == "--help":
+    if primOpt == "-h" or primOpt == "--help" or primOpt == "help":
         usage(scriptName)
         exit(0)
-    elif primOpt == "-i" or primOpt == "--show-ip":
+    elif primOpt == "show": # show host IP address
         print hostIp # a global value
 
-    elif primOpt == "-s" or primOpt == "-history":
+    elif primOpt == "history": # show recent chat history
         print("Under construction.")
         exit(3)
-    elif primOpt == "-c" or primOpt == "--compose":
+    elif primOpt == "new" or primOpt == "compose": # compose a message
         if secOpt == NULL_ARGUMENT:
             print "Invalid number of operands for %s option" % primOpt
             usage(scriptName)
@@ -129,7 +131,7 @@ def parseOpts(argv):
         print("Under construction.")
         exit(3)
 
-    elif primOpt == "-r" or primOpt == "--read":
+    elif primOpt == "read": # read a conversation
         if secOpt == NULL_ARGUMENT:
             print "Invalid number of operands for %s option" % primOpt
             usage(scriptName)
@@ -138,7 +140,7 @@ def parseOpts(argv):
         print "second option is", secOpt
         print("Under construction.")
         exit(3)
-    elif primOpt == "-d" or primOpt == "--delete":
+    elif primOpt == "rm-convo": # delete a conversation
         if secOpt == NULL_ARGUMENT:
             print "Invalid number of operands for %s option" % primOpt
             usage(scriptName)
@@ -147,7 +149,7 @@ def parseOpts(argv):
         print "second option is", secOpt
         print("Under construction.")
         exit(3)
-    elif primOpt == "-q" or primOpt == "--resend":
+    elif primOpt == "resend": # resend a failed message
         if secOpt == NULL_ARGUMENT:
             print "Invalid number of operands for %s option" % primOpt
             usage(scriptName)
@@ -156,7 +158,7 @@ def parseOpts(argv):
         print "second option is", secOpt
         print("Under construction.")
         exit(3)
-    elif primOpt == "-f" or primOpt == "--force-link":
+    elif primOpt == "force-link": # force-link a contact to an IP
         thirdOpt = grabOpt(argv, 3)
 
         if thirdOpt == NULL_ARGUMENT:
@@ -169,10 +171,28 @@ def parseOpts(argv):
 
         print("Under construction.")
         exit(3)
-    # for other options
-    #    elif primOpt == "-q" or primOpt == "--resend":
-    #        print("Under construction.")
-    #        exit(3)
+# for other options
+    elif primOpt == "contacts":
+        print("Under construction.")
+        exit(3)
+    elif primOpt == "add":
+        if secOpt == NULL_ARGUMENT:
+            print "Invalid number of operands for %s option" % primOpt
+            usage(scriptName)
+            exit(1)
+
+        print "second option is", secOpt
+        print("Under construction.")
+        exit(3)
+    elif primOpt == "rm-contact":
+        if secOpt == NULL_ARGUMENT:
+            print "Invalid number of operands for %s option" % primOpt
+            usage(scriptName)
+            exit(1)
+
+        print "second option is", secOpt
+        print("Under construction.")
+        exit(3)
     else:
         # some invalid option
         print "Invalid option %s" % primOpt
@@ -190,21 +210,36 @@ def usage(scriptName):
     # This is called by --help, -h, or invalid usage
 
     # print usage info
-    print "Usage: %s [options] [option arguments]" % scriptName
+    print "Usage: %s [options] [option arguments]\n" % scriptName
 
     # print help/option info
     # Don't indent on docstring
     optionMsg = """Options:
--i , --show-ip                   Show your IP address
--s , --history                   Show your recent chat history
--c , --compose     CONTACT       Compose & send message
--r , --read        CONTACT       Read a conversation
--d , --delete      CONTACT       Delete a conversation
--q , --resend      CONTACT       Resend a failed message
--h , --help                      Help
--f , --force-link  CONTACT, IP   Specify the IP address to try for CONTACT
+help, -h, --help                           help
+show                                       show host IP address
+history                                    show recent chat history
+compose, new           CONTACT             compose & send message
+read                   CONTACT             read a conversation
+rm-convo               CONTACT             delete a conversation
+resend                 CONTACT             resend a failed message
+force-link             CONTACT, IP         force-link contact to IP
+config                 variable, value     configure varialbles
+contacts                                   view contact list
+add                    CONTACT, IP         add a contact
+rm-contact             CONTACT             delete a contact
 
-    """
+"""
+
+#-i , --show-ip                   Show your IP address
+#-s , --history                   Show your recent chat history
+#-c , --compose     CONTACT       Compose & send message
+#-r , --read        CONTACT       Read a conversation
+#-d , --delete      CONTACT       Delete a conversation
+#-q , --resend      CONTACT       Resend a failed message
+#-h , --help                      Help
+#-f , --force-link  CONTACT, IP   Specify the IP address to try for CONTACT
+#
+#    """
 
     print(optionMsg)
 
