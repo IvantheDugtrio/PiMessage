@@ -173,8 +173,9 @@ def parseOpts(argv):
         exit(3)
 # for other options
     elif primOpt == "contacts":
-        print("Under construction.")
-        exit(3)
+        #print("Under construction.")
+        print open(dataDir+"contacts", 'r').read()
+        exit(0)
     elif primOpt == "add":
         if secOpt == NULL_ARGUMENT:
             print "Invalid number of operands for %s option" % primOpt
