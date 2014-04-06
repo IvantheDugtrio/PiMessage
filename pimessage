@@ -96,7 +96,7 @@ def parseOpts(argv):
     """
     Commands:                       | Options           | Arguments
      + help                         | help, -h, --help  | ---
-     + show host IP address         | show              | ---
+     + show host IP address         | ip                | ---
 
      + show recent chat history     | history           | ---
      + compose & send message       | compose, new      | Name
@@ -115,7 +115,7 @@ def parseOpts(argv):
     if primOpt == "-h" or primOpt == "--help" or primOpt == "help":
         usage(scriptName)
         exit(0)
-    elif primOpt == "show": # show host IP address
+    elif primOpt == "ip": # show host IP address
         print hostIp # a global value
 
     elif primOpt == "history": # show recent chat history
