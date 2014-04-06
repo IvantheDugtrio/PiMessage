@@ -7,4 +7,6 @@
 
 ## for pimessage ##
 rmHomeDir
+*.txt
+*.diff
 

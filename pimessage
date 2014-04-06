@@ -41,22 +41,30 @@ def mdUnix(name):
         return 0
 
 def initNewUser(user, homedir):
-    # make the directory
-    if mdUnix(homedir) == DIR_FAILURE:
-        exit(DIR_FAILURE)
+    print "Initializing new user"
 
+    # make the directory
+    if os.system("test -d " + homedir) != 0:
+        if mdUnix(homedir) == DIR_FAILURE:
+            exit(DIR_FAILURE)
 
     # generate user's keys
     # todo
 
 
+    # Get user input
     # write info to files
     open(homedir+"editor", 'w').write("vim") # doesn't terminate in newline
 
-    if mdUnix(homedir+"conversations/") == DIR_FAILURE:
-        exit(DIR_FAILURE)
-    # change permissions of conversations
-    os.system("chmod 700 " + homedir + "conversations/")
+    if os.system("test -d " + homedir + "conversations") != 0:
+        if mdUnix(homedir + "conversations") == DIR_FAILURE:
+            exit(DIR_FAILURE)
+        else:
+            # create permissions
+            os.system("chmod 600 " + homedir + "conversations")
+    
+    
+    open(homedir+"contacts", 'w').write("") # doesn't terminate in newline
 
 
     return 0
@@ -285,16 +293,27 @@ def main(argv):
 
     ## Get user information ##
     username = subprocess.Popen('whoami', stdout=subprocess.PIPE).communicate()[0]
-    # fails for non-unix systems
-
     username = username.rstrip('\n') # removes trailing newline
+
     dataDir = "/home/" + username + "/.pimessage/"
     dirExistsCommand = "test -d " + dataDir
     if os.system(dirExistsCommand) != 0:
         initNewUser(username, dataDir)
 
+    #dirFiles = subprocess.check_output("whoami")
+    dirFiles = subprocess.Popen(['ls', '-A', dataDir], stdout=subprocess.PIPE).communicate()[0]
+
+    # must be in correct ls -A order
+    CORRECT_DIR_FILES = """contacts
+conversations
+editor
+"""
+
+    if dirFiles != CORRECT_DIR_FILES:
+        initNewUser(username, dataDir)
+
+    editCommand = open(dataDir+"editor", 'r').read()
     hostIp = getHostIp()
-    #editCommand = open(dataDir+"editor", 'r').read()
 
     # get number of rows and number of columns on terminal
     #screenRows, screenColumns = os.popen('stty size', 'r').read().split()
@@ -320,10 +339,10 @@ def main(argv):
 
 
 
-
+    return 0
 
 
 
 if __name__ == "__main__":
-    main(sys.argv)
-    exit(0)
+    status = main(sys.argv)
+    exit(status)
