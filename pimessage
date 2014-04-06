@@ -13,8 +13,6 @@ import os
 import sys # for arg parsing
 import string
 import re # for searching
-#from optparse import OptionParser
-#import argparse
 
 ## make sure indents are 4 spaces if possible
 ## vim settings:
@@ -69,6 +67,111 @@ def grabOpt(argv, n):
         return NULL_ARGUMENT
     else:
         return argv[n]
+
+def parseOpts(argv):
+    scriptName = argv[0]
+    secOpt = grabOpt(argv, 2)
+    primOpt = grabOpt(argv, 1)
+
+    if primOpt == NULL_ARGUMENT:
+        # only contains the script name, no arguments
+        # call usage function
+        usage(scriptName)
+        exit(1)
+
+    """
+    Commands:                       | Options           | Arguments
+     + show host IP address         | show              | ---
+     + show recent chat history     | history           | ---
+     + compose & send message       | compose, new      | Name
+     + read a conversation          | read              | Person's_Name
+     + delete a conversation        | rm-convo          | Person's_Name
+     + resend a failed message      | resend            | Person's_Name
+     + help                         | help, -h, --help  | ---
+     + force-link contact to IP     | force-link        | Person's_Name, IP
+     + configure varialbles         | config            | varName, varValue
+     + view contact list            | contacts          | ---
+     + add a contact                | add               | Person's_Name, IP
+     + delete a contact             | rm-contact        | Person's_Name
+    """
+
+    #           short opt           long opt
+    if primOpt == "-h" or primOpt == "--help":
+        usage(scriptName)
+        exit(0)
+    elif primOpt == "-i" or primOpt == "--show-ip":
+        UserIp = getHostIp()
+        if UserIp != IP_FAILURE:
+            print UserIp
+            exit(0)
+        else:
+            print "Error getting your IP address. Exiting."
+            exit(1)
+
+    elif primOpt == "-s" or primOpt == "-history":
+        print("Under construction.")
+        exit(3)
+    elif primOpt == "-c" or primOpt == "--compose":
+        if secOpt == NULL_ARGUMENT:
+            print "Invalid number of operands for %s option" % primOpt
+            usage(scriptName)
+            exit(1)
+
+        print "second option is", secOpt
+        print("Under construction.")
+        exit(3)
+
+    elif primOpt == "-r" or primOpt == "--read":
+        if secOpt == NULL_ARGUMENT:
+            print "Invalid number of operands for %s option" % primOpt
+            usage(scriptName)
+            exit(1)
+
+        print "second option is", secOpt
+        print("Under construction.")
+        exit(3)
+    elif primOpt == "-d" or primOpt == "--delete":
+        if secOpt == NULL_ARGUMENT:
+            print "Invalid number of operands for %s option" % primOpt
+            usage(scriptName)
+            exit(1)
+
+        print "second option is", secOpt
+        print("Under construction.")
+        exit(3)
+    elif primOpt == "-q" or primOpt == "--resend":
+        if secOpt == NULL_ARGUMENT:
+            print "Invalid number of operands for %s option" % primOpt
+            usage(scriptName)
+            exit(1)
+
+        print "second option is", secOpt
+        print("Under construction.")
+        exit(3)
+    elif primOpt == "-f" or primOpt == "--force-link":
+        thirdOpt = grabOpt(argv, 3)
+
+        if thirdOpt == NULL_ARGUMENT:
+            print "Invalid number of operands for %s option" % primOpt
+            usage(scriptName)
+            exit(1)
+
+        print "second option is", secOpt
+        print "third option is", thirdOpt
+
+        print("Under construction.")
+        exit(3)
+    # for other options
+    #    elif primOpt == "-q" or primOpt == "--resend":
+    #        print("Under construction.")
+    #        exit(3)
+    else:
+        # some invalid option
+        print "Invalid option %s" % primOpt
+        usage(scriptName)
+        exit(1)
+
+
 
 ########################
 ##  Option functions  ##
@@ -180,105 +283,6 @@ def sendMessage(myContact):
 
 def main(argv):
 
-    ## Option parsing ##
-    scriptName = argv[0]
-    secOpt = grabOpt(argv, 2)
-    primOpt = grabOpt(argv, 1)
-
-    if primOpt == NULL_ARGUMENT:
-        # only contains the script name, no arguments
-        # call usage function
-        usage(scriptName)
-        exit(1)
-
-    # figure out which option was called
-
-#+ show host IP address         | -i , --show-ip    | ---
-#+ show recent chat history     | -s , --history    | ---
-#+ compose & send message       | -c , --compose    | Name
-#+ read a conversation          | -r , --read       | Person's_Name
-#+ delete a conversation        | -d , --delete     | Person's_Name
-#+ resend a failed message      | -q , --resend     | Person's_Name
-#+ help                         | -h , --help       | ---
-#+ force-link contact to IP     | -f , --force-link | Person's_Name, IP
-
-    #           short opt           long opt
-    if primOpt == "-h" or primOpt == "--help":
-        usage(scriptName)
-        exit(0)
-    elif primOpt == "-i" or primOpt == "--show-ip":
-        UserIp = getHostIp()
-        if UserIp != IP_FAILURE:
-            print UserIp
-            exit(0)
-        else:
-            print "Error getting your IP address. Exiting."
-            exit(1)
-
-    elif primOpt == "-s" or primOpt == "-history":
-        print("Under construction.")
-        exit(3)
-    elif primOpt == "-c" or primOpt == "--compose":
-        if secOpt == NULL_ARGUMENT:
-            print "Invalid number of operands for %s option" % primOpt
-            usage(scriptName)
-            exit(1)
-
-        print "second option is", secOpt
-        print("Under construction.")
-        exit(3)
-
-    elif primOpt == "-r" or primOpt == "--read":
-        if secOpt == NULL_ARGUMENT:
-            print "Invalid number of operands for %s option" % primOpt
-            usage(scriptName)
-            exit(1)
-
-        print "second option is", secOpt
-        print("Under construction.")
-        exit(3)
-    elif primOpt == "-d" or primOpt == "--delete":
-        if secOpt == NULL_ARGUMENT:
-            print "Invalid number of operands for %s option" % primOpt
-            usage(scriptName)
-            exit(1)
-
-        print "second option is", secOpt
-        print("Under construction.")
-        exit(3)
-    elif primOpt == "-q" or primOpt == "--resend":
-        if secOpt == NULL_ARGUMENT:
-            print "Invalid number of operands for %s option" % primOpt
-            usage(scriptName)
-            exit(1)
-
-        print "second option is", secOpt
-        print("Under construction.")
-        exit(3)
-    elif primOpt == "-f" or primOpt == "--force-link":
-        thirdOpt = grabOpt(argv, 3)
-
-        if thirdOpt == NULL_ARGUMENT:
-            print "Invalid number of operands for %s option" % primOpt
-            usage(scriptName)
-            exit(1)
-
-        print "second option is", secOpt
-        print "third option is", thirdOpt
-
-        print("Under construction.")
-        exit(3)
-# for other options
-#    elif primOpt == "-q" or primOpt == "--resend":
-#        print("Under construction.")
-#        exit(3)
-    else:
-        # some invalid option
-        print "Invalid option %s" % primOpt
-        usage(scriptName)
-        exit(1)
-
-
     ## Get user information ##
     username = subprocess.Popen('whoami', stdout=subprocess.PIPE).communicate()[0]
     # fails for non-unix systems
@@ -290,7 +294,7 @@ def main(argv):
         initNewUser(username, dataDir)
 
     hostIp = getHostIp()
-    editCommand = open(dataDir+"editor", 'r').read()
+    #editCommand = open(dataDir+"editor", 'r').read()
 
     # get number of rows and number of columns on terminal
     #screenRows, screenColumns = os.popen('stty size', 'r').read().split()
@@ -301,6 +305,13 @@ def main(argv):
     ## User must already have information entered
 
     #keyPress = welcomeScreen(hostIp, screenColumns)
+
+
+
+    ## Option parsing ##
+    # figure out which option was called
+    parseOpts(argv)
+
 
 
 
