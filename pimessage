@@ -30,6 +30,12 @@ IP_FAILURE = 1
 DIR_FAILURE = 2
 NULL_ARGUMENT = "."
 
+########################
+##  Global variables  ##
+########################
+
+# values are listed here, but should not be uncommented
+#hostIp
 
 ########################
 ##  Helper functions  ##
@@ -108,13 +114,7 @@ def parseOpts(argv):
         usage(scriptName)
         exit(0)
     elif primOpt == "-i" or primOpt == "--show-ip":
-        UserIp = getHostIp()
-        if UserIp != IP_FAILURE:
-            print UserIp
-            exit(0)
-        else:
-            print "Error getting your IP address. Exiting."
-            exit(1)
+        print hostIp # a global value
 
     elif primOpt == "-s" or primOpt == "-history":
         print("Under construction.")
@@ -295,12 +295,12 @@ def main(argv):
     username = subprocess.Popen('whoami', stdout=subprocess.PIPE).communicate()[0]
     username = username.rstrip('\n') # removes trailing newline
 
+    global dataDir
     dataDir = "/home/" + username + "/.pimessage/"
     dirExistsCommand = "test -d " + dataDir
     if os.system(dirExistsCommand) != 0:
         initNewUser(username, dataDir)
 
-    #dirFiles = subprocess.check_output("whoami")
     dirFiles = subprocess.Popen(['ls', '-A', dataDir], stdout=subprocess.PIPE).communicate()[0]
 
     # must be in correct ls -A order
@@ -312,8 +312,17 @@ editor
     if dirFiles != CORRECT_DIR_FILES:
         initNewUser(username, dataDir)
 
+    # get user's chosen editor
     editCommand = open(dataDir+"editor", 'r').read()
+    if subprocess.Popen(['which', editCommand], stdout=subprocess.PIPE).communicate()[0] == "":
+        print "Error: %s is not a valid editor. Please adjust your editor value" % editCommand
+        exit(2)
+
+    global hostIp
     hostIp = getHostIp()
+    if hostIp == IP_FAILURE:
+        print "Error: your IP address could not be correctly retrieved."
+        exit(2)
 
     # get number of rows and number of columns on terminal
     #screenRows, screenColumns = os.popen('stty size', 'r').read().split()
