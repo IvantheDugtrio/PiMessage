@@ -35,7 +35,8 @@ NULL_ARGUMENT = "."
 ########################
 
 # values are listed here, but should not be uncommented
-#hostIp
+global hostIp
+global operatingSystem
 
 ########################
 ##  Helper functions  ##
@@ -328,6 +329,15 @@ def sendMessage(myContact):
 def main(argv):
 
     ## Get user information ##
+    global operatingSystem
+    operatingSystem = os.name
+    if operatingSystem != "nt":
+        operatingSystem = subprocess.Popen(['uname', '-s'], stdout=subprocess.PIPE).communicate()[0]
+
+    if operatingSystem != "Linux" or operatingSystem != "Darwin":
+        print "Error: %s is not a supported operating system at this time." % (operatingSystem.rstrip('\n') )
+        exit(5)
+
     username = subprocess.Popen('whoami', stdout=subprocess.PIPE).communicate()[0]
     username = username.rstrip('\n') # removes trailing newline
 
