@@ -333,9 +333,10 @@ def main(argv):
     operatingSystem = os.name
     if operatingSystem != "nt":
         operatingSystem = subprocess.Popen(['uname', '-s'], stdout=subprocess.PIPE).communicate()[0]
+        operatingSystem = operatingSystem.rstrip('\n')
 
-    if operatingSystem != "Linux" or operatingSystem != "Darwin":
-        print "Error: %s is not a supported operating system at this time." % (operatingSystem.rstrip('\n') )
+    if operatingSystem != "Linux" and operatingSystem != "Darwin":
+        print "Error: %s is not a supported operating system at this time." % operatingSystem
         exit(5)
 
     username = subprocess.Popen('whoami', stdout=subprocess.PIPE).communicate()[0]
