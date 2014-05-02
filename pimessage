@@ -268,35 +268,41 @@ def getHostIp():
     # returns IP_FAILURE if no address was found
 
     ipaddress = IP_FAILURE # default case
-    cmdOutput = subprocess.Popen('ifconfig', stdout=subprocess.PIPE).communicate()[0]
-    #print cmdOutput
+    #cmdOutput = subprocess.Popen('ifconfig', stdout=subprocess.PIPE).communicate()[0]
+    ##print cmdOutput
 
+
+    ### slice the cmdOutput string:
+    ##modifiedOutput = cmdOutput[inetsub:]
+    #modifiedOutput = stringSlice(cmdOutput, "inet")
+    #if (modifiedOutput == ""):
+    #    return IP_FAILURE
 
     ## slice the cmdOutput string:
-    #modifiedOutput = cmdOutput[inetsub:]
-    modifiedOutput = stringSlice(cmdOutput, "inet")
-    if (modifiedOutput == ""):
-        return IP_FAILURE
+    #modifiedOutput = stringSlice(modifiedOutput, ":")
+    #if (modifiedOutput == ""):
+    #    return IP_FAILURE
 
-    # slice the cmdOutput string:
-    modifiedOutput = stringSlice(modifiedOutput, ":")
-    if (modifiedOutput == ""):
-        return IP_FAILURE
+    ### perhaps there is a good way to clean this up? ##
+    #match_object = re.search('\d', modifiedOutput)
+    #if match_object: # it returned a match
+    #    startSub = match_object.start()
+    #else:
+    #    return IP_FAILURE
 
-    ## perhaps there is a good way to clean this up? ##
-    match_object = re.search('\d', modifiedOutput)
-    if match_object: # it returned a match
-        startSub = match_object.start()
-    else:
-        return IP_FAILURE
+    #match_object = re.search(' ', modifiedOutput)
+    #if match_object: # it returned a match
+    #    endSub = match_object.start()
+    #else:
+    #    return IP_FAILURE
 
-    match_object = re.search(' ', modifiedOutput)
-    if match_object: # it returned a match
-        endSub = match_object.start()
-    else:
-        return IP_FAILURE
+    #ipaddress = modifiedOutput[startSub:endSub-1]
+    ipcmd = "wget -qO- icanhazip.com"
+    ipaddress = subprocess.Popen(ipcmd.split(), stdout=subprocess.PIPE).communicate()[0]
 
-    ipaddress = modifiedOutput[startSub:endSub-1]
+    ipaddress = ipaddress.rstrip()
+
+    
     return ipaddress # default is IP_FAILURE
 
 
