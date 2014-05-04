@@ -1,0 +1,25 @@
+PiMessage Message Specification
+-------------------------------
+
+Valid messages sent by PiMessage will be composed of the following
+structure:
+
+Meta Data:
+  Recepient IP address
+  Sender IP address
+  Time stamp
+Data:
+  Text
+
+
+--------------------
+
+All IP addresses will be composed in IPv4 format.
+
+The time stamp will be in accordance with the following format:
+Year-Month-Day-Hour-Minute-Second
+All values will be numerical.
+
+Ex.     2014-5-4-16:35:51
+
+

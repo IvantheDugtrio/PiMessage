@@ -13,6 +13,8 @@ import os
 import sys # for arg parsing
 import string
 import re # for searching
+import time
+import datetime
 
 ## make sure indents are 4 spaces if possible
 ## vim settings:
@@ -338,7 +340,20 @@ def getHostIp():
 
 
 def sendMessage(myContact):
+    # fetch sender IP
+
+    # fetch recipient IP
+
+    # compose the message
     # todo
+
+    # get time stamp in proper format
+    sendTime = time.time()
+
+    # format the message with the meta data
+
+    # send the whole message
+
     return 0
 
 
