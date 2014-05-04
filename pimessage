@@ -354,8 +354,12 @@ def main(argv):
     if operatingSystem != "nt":
         operatingSystem = subprocess.Popen(['uname', '-s'], stdout=subprocess.PIPE).communicate()[0]
         operatingSystem = operatingSystem.rstrip('\n')
+        # change Cygwin to say 'CYGWIN' always
+        underScoreIndex = operatingSystem.find("_")
+        if underScoreIndex != -1:
+            operatingSystem = operatingSystem[:underScoreIndex]
 
-    if operatingSystem != "Linux" and operatingSystem != "Darwin":
+    if operatingSystem != "Linux" and operatingSystem != "Darwin" and operatingSystem != "CYGWIN":
         print "Error: %s is not a supported operating system at this time." % operatingSystem
         exit(5)
 
