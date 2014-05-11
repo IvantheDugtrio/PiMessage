@@ -129,7 +129,7 @@ def grabOpt(argv, n):
     else:
         return argv[n]
 
-def parseOpts(argv):
+def parseOpts(argv, editCmd):
     scriptName = argv[0]
     secOpt = grabOpt(argv, 2)
     primOpt = grabOpt(argv, 1)
@@ -159,7 +159,7 @@ def parseOpts(argv):
         #print "second option is", secOpt
         #print("Under construction.")
         #exit(3)
-        sendMessage(secOpt)
+        sendMessage(secOpt, editCmd)
 
     elif primOpt == "read": # read a conversation
         if secOpt == NULL_ARGUMENT:
@@ -412,7 +412,7 @@ def rmContact(name):
 
 
 
-def sendMessage(myContact):
+def sendMessage(myContact, editor):
     # fetch sender IP
     if hostIp == IP_FAILURE:
         exit(1)
@@ -431,9 +431,11 @@ def sendMessage(myContact):
     # store this in conversations directory
     fileName = dataDir+"conversations/msg"+myContact
 
-    # temporary editor vim
-    editor = "vim" # DEBUG
-    os.system(editor+" "+fileName)
+    ret = os.system(editor+" "+fileName)
+    if ret != 0:
+        print "Error in opening message file."
+        exit(2)
+
 
     # prompt if they want to send or not
     shouldSend = raw_input("To send or not to send; that is the question (y/n): ")
@@ -523,7 +525,7 @@ editor
         initNewUser(username, dataDir)
 
     # get user's chosen editor
-    editCommand = open(dataDir+"editor", 'r').read()
+    editCommand = open(dataDir+"editor", 'r').read().rstrip('\n')
     if subprocess.Popen(['which', editCommand], stdout=subprocess.PIPE).communicate()[0] == "":
         print "Error: %s is not a valid editor. Please adjust your editor value" % editCommand
         exit(2)
@@ -548,7 +550,7 @@ editor
 
     ## Option parsing ##
     # figure out which option was called
-    parseOpts(argv)
+    parseOpts(argv, editCommand)
 
 
 
