@@ -198,7 +198,12 @@ def parseOpts(argv):
         # Betty Rogers\t98.76.54.321
 
         # Display the contact list in less
-        os.system("sed 's/\t.*$//' " + dataDir+"contacts | less")
+        if secOpt == "-a":
+            # show IP addresses in output
+            os.system("less "+dataDir+"contacts")
+        else:
+            # remove IP addresses from output
+            os.system("sed 's/\t.*$//' " + dataDir+"contacts | less")
 
         exit(0)
     elif primOpt == "add":
@@ -256,9 +261,21 @@ def parseOpts(argv):
             usage(scriptName)
             exit(1)
 
-        print "second option is", secOpt
-        print("Under construction.")
-        exit(3)
+        myFile = open(dataDir+"contacts", "r")
+        allContacts = myFile.read()
+        myFile.close()
+
+        # part up until that contact
+        contactIndex = allContacts.find(secOpt+"\t")
+        firstHalf = allContacts[:contactIndex-1]
+
+        # part right after that contact until the end
+        secondHalf = stringSlice(allContacts, secOpt)
+        secondHalf = stringSlice(secondHalf, '\n')
+        allContacts = firstHalf + secondHalf
+        myFile = open(dataDir+"contacts", "w")
+        myFile.write(allContacts) # add the new entry later
+        myFile.close()
     else:
         # some invalid option
         print "Invalid option %s" % primOpt
@@ -289,8 +306,8 @@ read                   CONTACT             read a conversation
 rm-convo               CONTACT             delete a conversation
 resend                 CONTACT             resend a failed message
 force-link             CONTACT, IP         force-link contact to IP
-config                 variable, value     configure varialbles
-contacts                                   view contact list
+config                 VARIABLE, VALUE     configure varialbles
+contacts               [-a]                view contact list [with IPs]
 add                    CONTACT, IP         add a contact
 rm-contact             CONTACT             delete a contact
 
