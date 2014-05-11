@@ -186,12 +186,10 @@ def parseOpts(argv):
             usage(scriptName)
             exit(1)
 
-        print "second option is", secOpt
-        print "third option is", thirdOpt
+        # default is to overwrite old contact
+        addContact(secOpt, thirdOpt, "y")
 
-        print("Under construction.")
-        exit(3)
-# for other options
+
     elif primOpt == "contacts":
         # contacts of the form:
         # Adam Smith\t1.2.3.4
@@ -215,44 +213,45 @@ def parseOpts(argv):
             exit(1)
 
         # Search for if this person is already there
-        myFile = open(dataDir+"contacts", "r")
-        allContacts = myFile.read()
-        myFile.close()
-        contactIndex = allContacts.find(secOpt+"\t")
-        if contactIndex != -1:
-            print "%s is already entered in your contact list." % secOpt
-            overwrite = raw_input("Would you like to overwrite this entry? (y/n) ")
-            if overwrite != "y":
-                print "Not overwriting the entry. Terminating."
-                exit(1)
-            else:
-                # remove the old one
+        addContact(secOpt, thirdOpt, "n")
+        #myFile = open(dataDir+"contacts", "r")
+        #allContacts = myFile.read()
+        #myFile.close()
+        #contactIndex = allContacts.find(secOpt+"\t")
+        #if contactIndex != -1:
+        #    print "%s is already entered in your contact list." % secOpt
+        #    overwrite = raw_input("Would you like to overwrite this entry? (y/n) ")
+        #    if overwrite != "y":
+        #        print "Not overwriting the entry. Terminating."
+        #        exit(1)
+        #    else:
+        #        # remove the old one
 
-                # part up until that contact
-                firstHalf = allContacts[:contactIndex-1]
+        #        # part up until that contact
+        #        firstHalf = allContacts[:contactIndex-1]
 
-                # part right after that contact until the end
-                secondHalf = stringSlice(allContacts, secOpt)
-                secondHalf = stringSlice(secondHalf, '\n')
-                allContacts = firstHalf + secondHalf
-                myFile = open(dataDir+"contacts", "w")
-                myFile.write(allContacts) # add the new entry later
-                myFile.close()
-                print "Your contact has been updated."
+        #        # part right after that contact until the end
+        #        secondHalf = stringSlice(allContacts, secOpt)
+        #        secondHalf = stringSlice(secondHalf, '\n')
+        #        allContacts = firstHalf + secondHalf
+        #        myFile = open(dataDir+"contacts", "w")
+        #        myFile.write(allContacts) # add the new entry later
+        #        myFile.close()
+        #        print "Your contact has been updated."
 
 
-        # add contact normally
-        myFile = open(dataDir+"contacts", "a")
-        addString = secOpt+"\t"+thirdOpt+"\n"
-        myFile.write(addString)
-        myFile.close()
+        ## add contact normally
+        #myFile = open(dataDir+"contacts", "a")
+        #addString = secOpt+"\t"+thirdOpt+"\n"
+        #myFile.write(addString)
+        #myFile.close()
 
-        # use GNU sort
-        sortCmd = "sort -f "+dataDir+"contacts > "+dataDir+"sort_contacts"
-        os.system(sortCmd)
+        ## use GNU sort
+        #sortCmd = "sort -f "+dataDir+"contacts > "+dataDir+"sort_contacts"
+        #os.system(sortCmd)
 
-        # overwrite old file
-        os.system("mv "+dataDir+"sort_contacts "+dataDir+"contacts")
+        ## overwrite old file
+        #os.system("mv "+dataDir+"sort_contacts "+dataDir+"contacts")
 
 
     elif primOpt == "rm-contact":
@@ -261,21 +260,22 @@ def parseOpts(argv):
             usage(scriptName)
             exit(1)
 
-        myFile = open(dataDir+"contacts", "r")
-        allContacts = myFile.read()
-        myFile.close()
+        rmContact(secOpt)
+        #myFile = open(dataDir+"contacts", "r")
+        #allContacts = myFile.read()
+        #myFile.close()
 
-        # part up until that contact
-        contactIndex = allContacts.find(secOpt+"\t")
-        firstHalf = allContacts[:contactIndex-1]
+        ## part up until that contact
+        #contactIndex = allContacts.find(secOpt+"\t")
+        #firstHalf = allContacts[:contactIndex-1]
 
-        # part right after that contact until the end
-        secondHalf = stringSlice(allContacts, secOpt)
-        secondHalf = stringSlice(secondHalf, '\n')
-        allContacts = firstHalf + secondHalf
-        myFile = open(dataDir+"contacts", "w")
-        myFile.write(allContacts) # add the new entry later
-        myFile.close()
+        ## part right after that contact until the end
+        #secondHalf = stringSlice(allContacts, secOpt)
+        #secondHalf = stringSlice(secondHalf, '\n')
+        #allContacts = firstHalf + secondHalf
+        #myFile = open(dataDir+"contacts", "w")
+        #myFile.write(allContacts) # add the new entry later
+        #myFile.close()
     else:
         # some invalid option
         print "Invalid option %s" % primOpt
@@ -369,6 +369,64 @@ def getHostIp():
 
 
     return ipaddress # default is IP_FAILURE
+
+def addContact(name, ip, overwrite):
+    # Search for if this person is already there
+    myFile = open(dataDir+"contacts", "r")
+    allContacts = myFile.read()
+    myFile.close()
+    contactIndex = allContacts.find(name+"\t")
+    if contactIndex != -1:
+        if overwrite != "y":
+            print "%s is already entered in your contact list." % name
+            overwrite = raw_input("Would you like to overwrite this entry? (y/n) ")
+        if overwrite != "y":
+            print "Not overwriting the entry. Terminating."
+            exit(1)
+        else:
+            # remove the old one
+            rmContact(name)
+            print "Your contact has been updated."
+
+
+    # add contact normally
+    myFile = open(dataDir+"contacts", "a")
+    addString = name+"\t"+ip+"\n"
+    myFile.write(addString)
+    myFile.close()
+
+    # use GNU sort
+    sortCmd = "sort -f "+dataDir+"contacts > "+dataDir+"sort_contacts"
+    os.system(sortCmd)
+
+    # overwrite old file
+    os.system("mv "+dataDir+"sort_contacts "+dataDir+"contacts")
+
+    return 0
+
+def rmContact(name):
+    myFile = open(dataDir+"contacts", "r")
+    allContacts = myFile.read()
+    myFile.close()
+
+    # this is the part up until that contact
+    contactIndex = allContacts.find(name+"\t")
+    if contactIndex == -1:
+        # contact isn't in here
+        return 1
+
+    firstHalf = allContacts[0:contactIndex]
+
+    # this is the part right after that contact until the end
+    secondHalf = stringSlice(allContacts, name)
+    secondHalf = stringSlice(secondHalf, '\n')
+    secondHalf = secondHalf[1:]
+    allContacts = firstHalf + secondHalf
+
+    myFile = open(dataDir+"contacts", "w")
+    myFile.write(allContacts) # add the new entry later
+    myFile.close()
+
 
 
 #def welcomeScreen(ip, width):
