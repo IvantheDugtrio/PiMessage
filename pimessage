@@ -352,50 +352,60 @@ def sendMessage(myContact):
         for line in fp:
             rec = line.split('\t')
             if rec[0] == myContact:
-                recIp = rec[1]
+                recIp = rec[1].rstrip('\n')
+                break
 
     # compose the message
-    fileName = "msg"+myContact
+
+    # store this in conversations directory
+    fileName = dataDir+"conversations/msg"+myContact
 
     # temporary editor vim
-    editor = "vim"
+    editor = "vim" # DEBUG
     os.system(editor+" "+fileName)
 
     # prompt if they want to send or not
-    print "To send or not to send; that is the question: "
-    #send = sys.argv 
+    shouldSend = raw_input("To send or not to send; that is the question (y/n): ")
 
-    # sendIF is true if you eat me or say yes. Otherwise NO!
-    #if send != "eat me":
+    ss = shouldSend
+    if ss != "y" and ss != "Y" and ss != "yes" and ss != "Yes" and ss != "YES":
+        print "Your message has been saved for next time you compose a message to %s" % myContact
+        exit(5)
+    #if shouldSend != "eat me":
     #    exit(5)    
-    #elif send != "y":
+    #elif shouldSend != "y":
     #    exit(5)
-    #elif send != "yes":
+    #elif shouldSend != "yes":
     #    exit(5)
-    #elif send != "Yes":
+    #elif shouldSend != "Yes":
     #    exit(5)
-    #elif send != "YES":
+    #elif shouldSend != "YES":
     #    exit(5)
 
     # get time stamp in proper format
     sendTime = str(time.time())
-    print sendTime
 
     # format the message with the meta data
-    message = open(sendTime+'_'+fileName, 'w')
+    message = open(fileName+'_'+sendTime, 'w')
     
-    message.write('Meta Data: \n')
-    message.write('\t'+recIp+'\n')
-    message.write('\t'+hostIp+'\n')    
-    message.write('\t'+sendTime+'\n')
-    message.write('Data: \n')
+    message.write(recIp+'\n')
+    message.write(hostIp+'\n')    
+    message.write(sendTime+"\n\n") # guaranteed two consecutive newlines
 
     with open(fileName) as fp:
         for line in fp:
-            message.write(line)
+           message.write(line)
+    
+    # clean up by removing old message to contact
+    ret = os.system("rm "+fileName)
+    if ret != 0:
+        print "Error in removing message file."
+        exit(2)
     
     # Send the full message
     #sploosh
+
+    # add the message to conversation history
     
     return 0
 
