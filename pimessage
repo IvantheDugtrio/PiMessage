@@ -69,6 +69,30 @@ def mdUnix(name):
 def initNewUser(user, homedir):
     print "Initializing new user"
 
+    # Let's make sure everyone knows for sure that this is being installed
+    installMessage = """
+    Do you grant piMessage permission to install on your computer?
+
+    PiMessage will have access to:
+
+    - your IP address
+    - any contacts you enter into PiMessage
+    - all of your conversations through PiMessage
+
+    PiMessage will create on your computer:
+    
+    - a directory to save the following PiMessage information
+    - a file to save your contacts and their saved IP addresses
+    - your conversations with contacts
+    - your preferred text editor
+
+    """
+    print installMessage
+    decision = raw_input("Do you want to install PiMessage? (y/n): ")
+    if decision != "y":
+        print "Not installing. Terminating PiMessage."
+        exit(1)
+
     # make the directory
     if os.system("test -d " + homedir) != 0:
         if mdUnix(homedir) == DIR_FAILURE:
@@ -92,8 +116,10 @@ def initNewUser(user, homedir):
 
     open(homedir+"contacts", 'w').write("") # doesn't terminate in newline
 
+    print "PiMessage has been successfully installed. Try --help for more info"
 
-    return 0
+
+    exit(0)
 
 def grabOpt(argv, n):
     # returns the nth arg or returns NULL_ARGUMENT
