@@ -347,39 +347,56 @@ def sendMessage(myContact):
         exit(1)
 
     # fetch recipient IP
-    #grepCmd = "grep -i '"+myContact+"' "+dataDir+"contacts"
-    #grepCmd = "cat "+dataDir+"contacts"
-    #sedCmd = "sed s/[^\\t]\+\\t//"
     
-    recIp = stringSlice(myContact, '\t')
-
-    # pipe the grepCmd into sedCmd and store into recIp
-    #p1 = subprocess.Popen(grepCmd.split(), stdout=subprocess.PIPE)
-    #p2 = subprocess.Popen(sedCmd.split(), stdin=p1.stdout, stdout=subprocess.PIPE)
-    #recIp = p2.communicate()[0]
-
-    #recIp = os.system("sed 's/"+myContact+"\t//'")
-    print "printing recIP"
-    print recIp
-
-    # DEBUG
-    exit(5)
+    with open(dataDir+"contacts") as fp:
+        for line in fp:
+            rec = line.split('\t')
+            if rec[0] == myContact:
+                recIp = rec[1]
 
     # compose the message
     fileName = "msg"+myContact
-    #os.system(editor+" "+fileName)
+
+    # temporary editor vim
+    editor = "vim"
+    os.system(editor+" "+fileName)
 
     # prompt if they want to send or not
+    print "To send or not to send; that is the question: "
+    #send = sys.argv 
 
-    # todo
+    # sendIF is true if you eat me or say yes. Otherwise NO!
+    #if send != "eat me":
+    #    exit(5)    
+    #elif send != "y":
+    #    exit(5)
+    #elif send != "yes":
+    #    exit(5)
+    #elif send != "Yes":
+    #    exit(5)
+    #elif send != "YES":
+    #    exit(5)
 
     # get time stamp in proper format
-    sendTime = time.time()
+    sendTime = str(time.time())
+    print sendTime
 
     # format the message with the meta data
+    message = open(sendTime+'_'+fileName, 'w')
+    
+    message.write('Meta Data: \n')
+    message.write('\t'+recIp+'\n')
+    message.write('\t'+hostIp+'\n')    
+    message.write('\t'+sendTime+'\n')
+    message.write('Data: \n')
 
-    # send the whole message
-
+    with open(fileName) as fp:
+        for line in fp:
+            message.write(line)
+    
+    # Send the full message
+    #sploosh
+    
     return 0
 
 
