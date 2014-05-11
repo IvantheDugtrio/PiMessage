@@ -15,6 +15,7 @@ import string
 import re # for searching
 import time
 import datetime
+import mmap
 
 ## make sure indents are 4 spaces if possible
 ## vim settings:
@@ -147,9 +148,10 @@ def parseOpts(argv):
             usage(scriptName)
             exit(1)
 
-        print "second option is", secOpt
-        print("Under construction.")
-        exit(3)
+        #print "second option is", secOpt
+        #print("Under construction.")
+        #exit(3)
+        sendMessage(secOpt)
 
     elif primOpt == "read": # read a conversation
         if secOpt == NULL_ARGUMENT:
@@ -341,10 +343,34 @@ def getHostIp():
 
 def sendMessage(myContact):
     # fetch sender IP
+    if hostIp == IP_FAILURE:
+        exit(1)
 
     # fetch recipient IP
+    #grepCmd = "grep -i '"+myContact+"' "+dataDir+"contacts"
+    #grepCmd = "cat "+dataDir+"contacts"
+    #sedCmd = "sed s/[^\\t]\+\\t//"
+    
+    recIp = stringSlice(myContact, '\t')
+
+    # pipe the grepCmd into sedCmd and store into recIp
+    #p1 = subprocess.Popen(grepCmd.split(), stdout=subprocess.PIPE)
+    #p2 = subprocess.Popen(sedCmd.split(), stdin=p1.stdout, stdout=subprocess.PIPE)
+    #recIp = p2.communicate()[0]
+
+    #recIp = os.system("sed 's/"+myContact+"\t//'")
+    print "printing recIP"
+    print recIp
+
+    # DEBUG
+    exit(5)
 
     # compose the message
+    fileName = "msg"+myContact
+    #os.system(editor+" "+fileName)
+
+    # prompt if they want to send or not
+
     # todo
 
     # get time stamp in proper format
