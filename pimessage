@@ -8,14 +8,15 @@ pi running raspbian OS.
 
 """
 
-import subprocess # for function calls
+import subprocess   # for function calls
 import os
-import sys # for arg parsing
+import sys          # for arg parsing
 import string
-import re # for searching
+import re           # for searching
 import time
 import datetime
 import mmap
+import socket       # for networking
 
 ## make sure indents are 4 spaces if possible
 ## vim settings:
@@ -44,6 +45,7 @@ global operatingSystem
 ########################
 ##  Helper functions  ##
 ########################
+
 def stringSlice(inString, searchString):
     # slices the input string so that the searchString is the beginning of
     # the returned string.  So if you pass in "hello world" as the first
@@ -58,8 +60,6 @@ def stringSlice(inString, searchString):
     else:
         returner = inString[searchSub:]
     return returner
-
-
 
 def mdUnix(name):
     if os.system("mkdir " + name) != 0:
@@ -476,12 +476,30 @@ def sendMessage(myContact, editor):
         exit(2)
     
     # Send the full message
-    #sploosh
+
+    s = socket.socket()
+    host = socket.gethostname()
+    port = 3469
+    s.connect((recIP, port)) # Now connect to the recipient on port 3469
+    print s.recv(1024)
 
     # add the message to conversation history
     
     return 0
 
+def listenServer
+    s = socket.socket()
+    host = socket.gethostname()
+    port = 3469
+    s.bind((host, port))
+    
+    s.listen(5) # wait for client connection (5 seconds)
+
+    while True:
+        c, addr = s.accept() # establish connection with client
+        print 'Got connection from ', addr
+        c.send('Thank you for connecting')
+        c.close() # close the connection
 
 ########################
 ##   Main function    ##
