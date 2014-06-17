@@ -469,22 +469,29 @@ def sendMessage(myContact, editor):
     with open(fileName) as fp:
         for line in fp:
            message.write(line)
-    
-    # clean up by removing old message to contact
-    ret = os.system("rm "+fileName)
-    if ret != 0:
-        print "Error in removing message file."
-        exit(2)
+
+    message.close()
     
     # Send the full message
 
     s = socket.socket()
     host = socket.gethostname()
-    port = 3469
+    port = 8469
+    print recIp
+    #s.bind((host, port))
     s.connect((recIp, port)) # Now connect to the recipient on port 3469
     print s.recv(1024)
 
     # add the message to conversation history
+
+
+
+    # clean up by removing old message to contact
+    ret = os.system("rm "+fileName)
+    if ret != 0:
+        print "Error in removing message file."
+        exit(2)
+
     
     return 0
 
