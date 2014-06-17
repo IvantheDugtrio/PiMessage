@@ -476,11 +476,24 @@ def sendMessage(myContact, editor):
 
     s = socket.socket()
     host = socket.gethostname()
-    port = 8469
-    print recIp
-    #s.bind((host, port))
-    s.connect((recIp, port)) # Now connect to the recipient on port 3469
-    print s.recv(1024)
+    port = 10000
+    s.connect((recIp, port))
+
+    try:
+        print >> sys.stderr, 'sending "%s"' % message
+        s.sendall(message)
+
+        amount_received = 0
+        amount_expected = len(message)
+
+        while amount_recieved < amount_expected:
+            data = s.recv(16)
+            amount_received += len(data)
+            print >>sys.stderr, 'received "%s"' % data
+
+    finally:
+        print >>sys.stderr, 'closing socket'
+        s.close()   # Close the socket when done
 
     # add the message to conversation history
 
@@ -494,20 +507,6 @@ def sendMessage(myContact, editor):
 
     
     return 0
-
-def listenServer():
-    s = socket.socket()
-    host = socket.gethostname()
-    port = 3469
-    s.bind((host, port))
-    
-    s.listen(5) # wait for client connection (5 seconds)
-
-    while True:
-        c, addr = s.accept() # establish connection with client
-        print 'Got connection from ', addr
-        c.send('Thank you for connecting')
-        c.close() # close the connection
 
 ########################
 ##   Main function    ##
