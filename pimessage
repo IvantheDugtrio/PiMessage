@@ -474,19 +474,23 @@ def sendMessage(myContact, editor):
     
     # Send the full message
 
+    msgString = ""
+    with open(fileName+'_'+sendTime, 'r') as message:
+        msgString = message.read()
+
     s = socket.socket()
     host = socket.gethostname()
     port = 10000
     s.connect((recIp, port))
 
     try:
-        print >> sys.stderr, 'sending "%s"' % message
-        s.sendall(message)
+        print >> sys.stderr, 'sending "%s"' % msgString
+        s.sendall(msgString)
 
         amount_received = 0
-        amount_expected = len(message)
+        amount_expected = len(msgString)
 
-        while amount_recieved < amount_expected:
+        while amount_received < amount_expected:
             data = s.recv(16)
             amount_received += len(data)
             print >>sys.stderr, 'received "%s"' % data
