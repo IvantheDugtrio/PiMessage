@@ -117,7 +117,7 @@ def initNewUser(user, homedir):
 
     open(homedir+"contacts", 'w').write("") # doesn't terminate in newline
 
-    print "PiMessage has been successfully installed. Try --help for more info"
+    print "PiMessage has been successfully installed."
 
 
     exit(0)
