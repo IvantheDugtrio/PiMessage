@@ -112,7 +112,7 @@ def initNewUser(user, homedir):
             exit(DIR_FAILURE)
         else:
             # create permissions
-            os.system("chmod 600 " + homedir + "conversations")
+            os.system("chmod 700 " + homedir + "conversations")
 
 
     open(homedir+"contacts", 'w').write("") # doesn't terminate in newline
@@ -419,6 +419,7 @@ def sendMessage(myContact, editor):
 
     # fetch recipient IP
     
+    recIp = ""
     with open(dataDir+"contacts") as fp:
         for line in fp:
             rec = line.split('\t')
@@ -480,7 +481,7 @@ def sendMessage(myContact, editor):
     s = socket.socket()
     host = socket.gethostname()
     port = 3469
-    s.connect((recIP, port)) # Now connect to the recipient on port 3469
+    s.connect((recIp, port)) # Now connect to the recipient on port 3469
     print s.recv(1024)
 
     # add the message to conversation history
