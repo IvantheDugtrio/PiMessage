@@ -22,4 +22,5 @@ All values will be numerical.
 
 Ex.     2014-5-4-16:35:51
 
-
+Networking uses the following website for referencing:
+http://pymotw.com/2/socket/tcp.html
