@@ -68,7 +68,7 @@ def initNewUser(user, homedir):
     - all of your conversations through PiMessage
 
     PiMessage will create on your computer:
-    
+
     - a directory to save the following PiMessage information
     - a file to save your contacts and their saved IP addresses
     - your conversations with contacts
@@ -205,7 +205,7 @@ def parseOpts(argv, editCmd):
         addContact(secOpt, thirdOpt, "n")
 
 
-    elif primOpt == "force-link": 
+    elif primOpt == "force-link":
         # force-link a contact to an IP
         # essentially, just overwrite a contact's IP
 
@@ -364,7 +364,7 @@ def sendMessage(myContact, editor):
         exit(1)
 
     # fetch recipient IP
-    
+
     recIp = ""
     with open(dataDir+"contacts") as fp:
         for line in fp:
@@ -373,7 +373,7 @@ def sendMessage(myContact, editor):
                 recIp = rec[1].rstrip('\n')
                 break
 
-    # compose the message
+    ## Compose the message
 
     # store this in conversations directory
     fileName = dataDir+"conversations/msg"+myContact
@@ -392,7 +392,7 @@ def sendMessage(myContact, editor):
         print "Your message has been saved for next time you compose a message to %s" % myContact
         exit(5)
     #if shouldSend != "eat me":
-    #    exit(5)    
+    #    exit(5)
     #elif shouldSend != "y":
     #    exit(5)
     #elif shouldSend != "yes":
@@ -406,23 +406,20 @@ def sendMessage(myContact, editor):
     sendTime = str(time.time())
 
     # format the message with the meta data
-    message = open(fileName+'_'+sendTime, 'w')
-    
-    message.write(recIp+'\n')
-    message.write(hostIp+'\n')    
-    message.write(sendTime+"\n\n") # guaranteed two consecutive newlines
+    msgLines = []
+
+    msgLines.append(recIp)
+    msgLines.append(hostIp)
+    msgLines.append(sendTime) # guaranteed two consecutive newlines
+    msgLines.append("")
 
     with open(fileName) as fp:
         for line in fp:
-           message.write(line)
+           msgLines.append(line.rstrip('\n') )
 
-    message.close()
-    
+    msgString = "\n".join(msgLines)
+
     # Send the full message
-
-    msgString = ""
-    with open(fileName+'_'+sendTime, 'r') as message:
-        msgString = message.read()
 
     s = socket.socket()
     host = socket.gethostname()
@@ -458,7 +455,7 @@ def sendMessage(myContact, editor):
         print "Error in removing message file."
         exit(2)
 
-    
+
     return 0
 
 ########################

@@ -5,6 +5,14 @@ import sys
 
 import ip # local file
 
+"""
+This is the PiMessage daemon. This acts as a server running on every user's
+computer to receive PiMessages sent over LAN.
+
+2014 Nate Fischer, Ivan De Dios
+
+"""
+
 # fetch IP address of machine
 serverIp = ip.getHostIp()
 if serverIp == ip.IP_FAILURE:
