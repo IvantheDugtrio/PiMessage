@@ -5,7 +5,7 @@ import sys
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-server_address = ('localhost', 10000)
+server_address = ('192.168.1.10', 10000)
 
 sock.bind(server_address)
 
@@ -15,8 +15,8 @@ print "done listening"
 
 while True:
     # Wait for a connection
-    connection, client_address = sock.accept()
     print "done waiting"
+    connection, client_address = sock.accept()
 
     try:
         while True:
@@ -29,6 +29,10 @@ while True:
 
     finally:
         connection.close()
+
+        # right here is where I need to handle writing the data to file or closing the file for the conversation
+
+        # inform the user that they got a pimessage
 
 
 
