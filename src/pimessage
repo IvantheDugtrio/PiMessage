@@ -430,20 +430,23 @@ def sendMessage(myContact, editor):
     s.connect((recIp, port))
 
     try:
-        print >> sys.stderr, 'sending "%s"' % msgString
         s.sendall(msgString)
 
         amount_received = 0
         amount_expected = len(msgString)
+        packets = []
 
         while amount_received < amount_expected:
             data = s.recv(16)
             amount_received += len(data)
-            print >>sys.stderr, 'received "%s"' % data
+            packets.append(data)
 
     finally:
-        print >>sys.stderr, 'closing socket'
         s.close()   # Close the socket when done
+        recvMsg = "".join(packets)
+
+        if msgString != recvMsg:
+            print "There may be an error with the data sent"
 
     # add the message to conversation history
 
