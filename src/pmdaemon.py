@@ -11,17 +11,16 @@ sock.bind(server_address)
 
 # listen for incoming connections
 sock.listen(1)
-print "done listening"
 
 while True:
     # Wait for a connection
-    print "done waiting"
     connection, client_address = sock.accept()
+    packets = []
 
     try:
         while True:
             data = connection.recv(16)
-            print 'received "%s"' % data
+            packets.append(data)
             if data:
                 connection.sendall(data)
             else:
@@ -30,9 +29,22 @@ while True:
     finally:
         connection.close()
 
-        # right here is where I need to handle writing the data to file or closing the file for the conversation
+        message = "".join(packets) # concatenate all packets together
+        print message
+
+        # verify that this message is going to the correct IP
+
+        # identify who this message is from & sort accordingly
+
+        # strip off the message's metadata
+
+        # write the newly received message to disc
 
         # inform the user that they got a pimessage
+
+
+
+        # then return to receive more messages
 
 
 

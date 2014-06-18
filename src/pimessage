@@ -32,7 +32,7 @@ import socket       # for networking
 
 IP_FAILURE = 1
 DIR_FAILURE = 2
-NULL_ARGUMENT = "."
+NULL_ARGUMENT = ""
 
 ########################
 ##  Global variables  ##
