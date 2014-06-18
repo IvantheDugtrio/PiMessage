@@ -3,9 +3,18 @@
 import socket
 import sys
 
+import ip # local file
+
+# fetch IP address of machine
+serverIp = ip.getHostIp()
+if serverIp == ip.IP_FAILURE:
+    print >>sys.stderr, "Error: Unable to start PiMessage Daemon."
+    print >>sys.stderr, "IP address could not be found"
+    exit(1)
+
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-server_address = ('192.168.1.10', 10000)
+server_address = (serverIp, 10000)
 
 sock.bind(server_address)
 

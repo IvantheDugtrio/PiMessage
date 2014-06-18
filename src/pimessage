@@ -18,6 +18,8 @@ import datetime
 import mmap
 import socket       # for networking
 
+import ip           # local file
+
 ## make sure indents are 4 spaces if possible
 ## vim settings:
 ##              set et
@@ -30,7 +32,7 @@ import socket       # for networking
 ##  Global constants  ##
 ########################
 
-IP_FAILURE = 1
+IP_FAILURE = ip.IP_FAILURE
 DIR_FAILURE = 2
 NULL_ARGUMENT = ""
 
@@ -45,21 +47,6 @@ global operatingSystem
 ########################
 ##  Helper functions  ##
 ########################
-
-def stringSlice(inString, searchString):
-    # slices the input string so that the searchString is the beginning of
-    # the returned string.  So if you pass in "hello world" as the first
-    # string and then "lo" as the second string, this function will return
-    # "lo world". If you pass in "foo" as the second string instead, you
-    # will get "" returned. If you pass in "h" as the first string, you
-    # will get "hello world" as the output.
-
-    searchSub = inString.find(searchString)
-    if searchSub == -1:
-        returner = ""
-    else:
-        returner = inString[searchSub:]
-    return returner
 
 def mdUnix(name):
     if os.system("mkdir " + name) != 0:
@@ -294,47 +281,6 @@ rm-contact             CONTACT             delete a contact
     return # exit after calling this function
 
 
-def getHostIp():
-    # returns IP_FAILURE if no address was found
-
-    ipaddress = IP_FAILURE # default case
-    #cmdOutput = subprocess.Popen('ifconfig', stdout=subprocess.PIPE).communicate()[0]
-    ##print cmdOutput
-
-
-    ### slice the cmdOutput string:
-    ##modifiedOutput = cmdOutput[inetsub:]
-    #modifiedOutput = stringSlice(cmdOutput, "inet")
-    #if (modifiedOutput == ""):
-    #    return IP_FAILURE
-
-    ## slice the cmdOutput string:
-    #modifiedOutput = stringSlice(modifiedOutput, ":")
-    #if (modifiedOutput == ""):
-    #    return IP_FAILURE
-
-    ### perhaps there is a good way to clean this up? ##
-    #match_object = re.search('\d', modifiedOutput)
-    #if match_object: # it returned a match
-    #    startSub = match_object.start()
-    #else:
-    #    return IP_FAILURE
-
-    #match_object = re.search(' ', modifiedOutput)
-    #if match_object: # it returned a match
-    #    endSub = match_object.start()
-    #else:
-    #    return IP_FAILURE
-
-    #ipaddress = modifiedOutput[startSub:endSub-1]
-    ipcmd = "wget -qO- icanhazip.com"
-    ipaddress = subprocess.Popen(ipcmd.split(), stdout=subprocess.PIPE).communicate()[0]
-
-    ipaddress = ipaddress.rstrip()
-
-
-    return ipaddress # default is IP_FAILURE
-
 def addContact(name, ip, overwrite):
     # Search for if this person is already there
     myFile = open(dataDir+"contacts", "r")
@@ -383,8 +329,8 @@ def rmContact(name):
     firstHalf = allContacts[0:contactIndex]
 
     # this is the part right after that contact until the end
-    secondHalf = stringSlice(allContacts, name)
-    secondHalf = stringSlice(secondHalf, '\n')
+    secondHalf = ip.stringSlice(allContacts, name)
+    secondHalf = ip.stringSlice(secondHalf, '\n')
     secondHalf = secondHalf[1:]
     allContacts = firstHalf + secondHalf
 
@@ -560,7 +506,7 @@ editor
         exit(2)
 
     global hostIp
-    hostIp = getHostIp()
+    hostIp = ip.getHostIp()
     if hostIp == IP_FAILURE:
         print "Error: your IP address could not be correctly retrieved."
         exit(2)

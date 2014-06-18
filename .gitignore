@@ -10,4 +10,5 @@ rmHomeDir
 *.txt
 *.diff
 test*
+*.pyc # compiled modules
 
