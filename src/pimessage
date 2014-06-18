@@ -416,6 +416,7 @@ def sendMessage(myContact, editor):
     with open(fileName) as fp:
         for line in fp:
            msgLines.append(line.rstrip('\n') )
+    msgLines.append("")
 
     msgString = "\n".join(msgLines)
 
