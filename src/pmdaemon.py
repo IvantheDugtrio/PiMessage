@@ -4,6 +4,7 @@ import socket
 import sys
 
 import ip # local file
+import utils
 
 """
 This is the PiMessage daemon. This acts as a server running on every user's
@@ -12,6 +13,8 @@ computer to receive PiMessages sent over LAN.
 2014 Nate Fischer, Ivan De Dios
 
 """
+
+print >>sys.stdout, "Starting pmdaemon" # DEBUG
 
 # fetch IP address of machine
 serverIp = ip.getHostIp()
@@ -47,17 +50,16 @@ while True:
         connection.close()
 
         message = "".join(packets) # concatenate all packets together
-        print message
+
+        lines = message.split('\n')
 
         # verify that this message is going to the correct IP
+        if lines[0] == serverIp: # don't accept otherwise
+            #print message
 
-        # identify who this message is from & sort accordingly
+            utils.saveMessage(message, "rec")
 
-        # strip off the message's metadata
-
-        # write the newly received message to disc
-
-        # inform the user that they got a pimessage
+            # inform the user that they got a pimessage
 
 
 
