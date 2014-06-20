@@ -14,7 +14,7 @@ computer to receive PiMessages sent over LAN.
 
 """
 
-print >>sys.stdout, "Starting pmdaemon" # DEBUG
+#print >>sys.stdout, "Starting pmdaemon" # DEBUG
 
 # fetch IP address of machine
 serverIp = ip.getHostIp()
