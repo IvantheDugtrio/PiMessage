@@ -19,6 +19,7 @@ import mmap
 import socket       # for networking
 
 import ip           # local file
+import utils
 
 ## make sure indents are 4 spaces if possible
 ## vim settings:
@@ -447,6 +448,9 @@ def sendMessage(myContact, editor):
             print "There may be an error with the data sent"
 
     # add the message to conversation history
+    ret = utils.saveMessage(msgString, "send")
+    if ret == utils.TUPLE_FAIL:
+        print "failure in saving your message."
 
 
 
@@ -480,8 +484,7 @@ def main(argv):
         print "Error: %s is not a supported operating system at this time." % operatingSystem
         exit(5)
 
-    username = subprocess.Popen('whoami', stdout=subprocess.PIPE).communicate()[0]
-    username = username.rstrip('\n') # removes trailing newline
+    username = utils.getUser()
 
     global dataDir
     dataDir = "/home/" + username + "/.pimessage/"

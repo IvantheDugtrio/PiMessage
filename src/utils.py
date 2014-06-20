@@ -8,10 +8,33 @@ program
 
 """
 
+import subprocess
 import time
 import datetime
 
 TUPLE_FAIL = (None, None)
+
+def getUser():
+    username = subprocess.Popen('whoami', stdout=subprocess.PIPE).communicate()[0]
+    username = username.rstrip('\n') # removes trailing newline
+    return username
+
+def nameFromIp(ip):
+    # returns the name associated with the ip address
+    # returns empty string on failure
+
+    dataDir = "/home/"+getUser()+"/.pimessage/"
+    name = ""
+    with open(dataDir+"contacts") as fp:
+        for line in fp:
+            rec = line.split('\t')
+            if rec[1].rstrip('\n') == ip:
+                name = rec[0]
+                break
+
+    #print "You're contacting %s" % name
+    return name
+
 
 def saveMessage(msgString, mode):
     # This parses the message to save the appropriate message contents into the correct conversation file
@@ -30,24 +53,23 @@ def saveMessage(msgString, mode):
     else:
         return TUPLE_FAIL
 
-    timeStamp = int(float(lines[2]) )
+    timeStamp = int(float(lines[2]) ) # necessary to truncate
     msgData = lines[4:]
 
     # find out who wrote this file
-    contact = "Nate"
+    contact = nameFromIp(othAddress)
     convFile = "sample.txt"
 
     # write the newly received message to disc
     try:
-        f = open(convFile, 'w')
-        f.write(contact+" wrote:\n")
+        f = open(convFile, 'a')
+        f.write('\n'+contact+" wrote:\n")
         for k in msgData:
             f.write(k+'\n')
 
         value = datetime.datetime.fromtimestamp(timeStamp)
         formattedStamp = value.strftime('%m/%d/%Y %H:%M')
-        f.write(formattedStamp)
-        print(formattedStamp)
+        f.write(formattedStamp+'\n')
 
         f.close()
     except:
