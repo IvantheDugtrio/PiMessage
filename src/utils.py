@@ -58,18 +58,22 @@ def saveMessage(msgString, mode):
 
     # find out who wrote this file
     contact = nameFromIp(othAddress)
-    convFile = "sample.txt"
+    dataDir = "/home/"+getUser()+"/.pimessage/"
+    convFile = dataDir+"conversations/"+contact+".conv"
+
+    if mode == "send":
+        contact = "You"
 
     # write the newly received message to disc
     try:
         f = open(convFile, 'a')
-        f.write('\n'+contact+" wrote:\n")
+        f.write(contact+" wrote:\n")
         for k in msgData:
             f.write(k+'\n')
 
         value = datetime.datetime.fromtimestamp(timeStamp)
         formattedStamp = value.strftime('%m/%d/%Y %H:%M')
-        f.write(formattedStamp+'\n')
+        f.write(formattedStamp+'\n\n')
 
         f.close()
     except:
