@@ -135,8 +135,13 @@ def parseOpts(argv, editCmd):
     elif primOpt == "ip": # show host IP address
         print hostIp # a global value
 
-    elif primOpt == "history": # show recent chat history
-        val = showRecents(False)
+    elif primOpt == "history" or primOpt == "recent":
+        # show recent chat history
+        val = ""
+        if secOpt == "-a":
+            val = showRecents(True)
+        else:
+            val = showRecents(False)
         exit(val)
     elif primOpt == "new" or primOpt == "compose": # compose a message
         if secOpt == NULL_ARGUMENT:
@@ -144,9 +149,6 @@ def parseOpts(argv, editCmd):
             usage(scriptName)
             exit(1)
 
-        #print "second option is", secOpt
-        #print("Under construction.")
-        #exit(3)
         sendMessage(secOpt, editCmd)
 
     elif primOpt == "read": # read a conversation
@@ -226,7 +228,17 @@ def parseOpts(argv, editCmd):
             usage(scriptName)
             exit(1)
 
-        rmContact(secOpt)
+        ret = rmContact(secOpt)
+        if ret != 0:
+            print "Error in removing your contact."
+            exit(ret)
+
+        resp = raw_input("Would you also like to delete conversation history for this contact? (y/n) ")
+        if resp == "y" or resp == "yes" or resp == "Y":
+            print "deleting conversation for", secOpt
+            ret = rmConvo(secOpt)
+
+        exit(ret)
 
     else:
         # some invalid option
@@ -252,7 +264,7 @@ def usage(scriptName):
     optionMsg = """Options:
 help, -h, --help                           help
 ip                                         show host IP address
-history                                    show recent chat history
+history, recent        [-a]                show recent chat history
 compose, new           CONTACT             compose & send message
 read                   CONTACT             read a conversation
 rm-convo               CONTACT             delete a conversation
@@ -337,6 +349,8 @@ def rmContact(name):
     myFile = open(dataDir+"contacts", "w")
     myFile.write(allContacts) # add the new entry later
     myFile.close()
+
+    return 0
 
 
 
