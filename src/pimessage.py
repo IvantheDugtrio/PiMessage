@@ -136,8 +136,8 @@ def parseOpts(argv, editCmd):
         print hostIp # a global value
 
     elif primOpt == "history": # show recent chat history
-        print("Under construction.")
-        exit(3)
+        val = showRecents(False)
+        exit(val)
     elif primOpt == "new" or primOpt == "compose": # compose a message
         if secOpt == NULL_ARGUMENT:
             print "Invalid number of operands for %s option" % primOpt
@@ -357,6 +357,32 @@ def rmContact(name):
 #    return 0
 
 
+
+def showRecents(isAll):
+    # This shows the 10 most recent conversations & the top message in each
+    # one by default. This has the option to show all recent conversations
+    # in a similar fashion if `isAll' is True.
+
+    # Build the list of recent conversations
+    getConvoCmd = "ls -t "+dataDir+"conversations/"
+    sortedConvos = subprocess.Popen(getConvoCmd.split(), stdout=subprocess.PIPE).communicate()[0]
+
+    convoList = sortedConvos.split('\n')
+
+    if not isAll:
+        convoList = convoList[0:9]
+
+    for k in convoList:
+        # remove .conv from each conversation
+        vals = k.split('.')
+        if len(vals) == 2:
+            k = vals[0]
+        else:
+            k = ".".join(vals[0:len(vals)-1] )
+
+        print k
+
+    return
 
 def readConvo(myContact):
     # Read the saved conversation with this contact if one exists
