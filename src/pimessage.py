@@ -148,7 +148,7 @@ def parseOpts(argv, editCmd):
             print "Invalid number of operands for %s option" % primOpt
             usage(scriptName)
             exit(1)
-        
+
         thirdOpt = grabOpt(argv, 3)
         fourthOpt = grabOpt(argv, 4)
 
@@ -180,9 +180,7 @@ def parseOpts(argv, editCmd):
             usage(scriptName)
             exit(1)
 
-        print "second option is", secOpt
-        print("Under construction.")
-        exit(3)
+        sendMessage(secOpt, editCmd, "", False)
 
 
     elif primOpt == "contacts":
@@ -436,7 +434,7 @@ def rmConvo(myContact):
 
     return os.system("rm "+convFile)
 
-def sendMessage(myContact, editor, text=""):
+def sendMessage(myContact, editor, text="", shouldCompose=True):
     # fetch sender IP
     if hostIp == IP_FAILURE:
         exit(1)
@@ -456,19 +454,29 @@ def sendMessage(myContact, editor, text=""):
     # store this in conversations directory
     fileName = dataDir+"conversations/msg"+myContact
 
-    if text == "":
-        ret = os.system(editor+" "+fileName)
-        if ret != 0:
-            print "Error in opening message file."
-            exit(2)
+    if shouldCompose:
+        if text == "":
+            ret = os.system(editor+" "+fileName)
+            if ret != 0:
+                print "Error in opening message file."
+                exit(2)
+        else:
+            # use the short message typed by the user at the prompt
+            try:
+                f = open(fileName, 'w')
+                f.write(text)
+                f.close()
+            except:
+                print "Error composing your file on disc."
+                exit(1)
     else:
-        # use the short message typed by the user at the prompt
+        # check to see if a saved message actually exists
         try:
-            f = open(fileName, 'w')
-            f.write(text)
+            f = open(fileName, 'r')
             f.close()
         except:
-            print "Error composing your file on disc."
+            # if we couldn't open the file, then we can't resend it
+            print "Unable to find a saved message for", myContact
             exit(1)
 
 
@@ -479,16 +487,6 @@ def sendMessage(myContact, editor, text=""):
     if ss != "y" and ss != "Y" and ss != "yes" and ss != "Yes" and ss != "YES":
         print "Your message has been saved for next time you compose a message to %s" % myContact
         exit(5)
-    #if shouldSend != "eat me":
-    #    exit(5)
-    #elif shouldSend != "y":
-    #    exit(5)
-    #elif shouldSend != "yes":
-    #    exit(5)
-    #elif shouldSend != "Yes":
-    #    exit(5)
-    #elif shouldSend != "YES":
-    #    exit(5)
 
     # get time stamp in proper format
     sendTime = str(time.time())
