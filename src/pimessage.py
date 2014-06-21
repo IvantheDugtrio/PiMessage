@@ -148,8 +148,14 @@ def parseOpts(argv, editCmd):
             print "Invalid number of operands for %s option" % primOpt
             usage(scriptName)
             exit(1)
+        
+        thirdOpt = grabOpt(argv, 3)
+        fourthOpt = grabOpt(argv, 4)
 
-        sendMessage(secOpt, editCmd)
+        if thirdOpt == "-m" and fourthOpt != NULL_ARGUMENT:
+            sendMessage(secOpt, editCmd, fourthOpt)
+        else:
+            sendMessage(secOpt, editCmd)
 
     elif primOpt == "read": # read a conversation
         if secOpt == NULL_ARGUMENT:
@@ -265,7 +271,7 @@ def usage(scriptName):
 help, -h, --help                           help
 ip                                         show host IP address
 history, recent        [-a]                show recent chat history
-compose, new           CONTACT             compose & send message
+compose, new           CONTACT [-m "msg"]  compose & send message
 read                   CONTACT             read a conversation
 rm-convo               CONTACT             delete a conversation
 resend                 CONTACT             resend a failed message
@@ -430,7 +436,7 @@ def rmConvo(myContact):
 
     return os.system("rm "+convFile)
 
-def sendMessage(myContact, editor):
+def sendMessage(myContact, editor, text=""):
     # fetch sender IP
     if hostIp == IP_FAILURE:
         exit(1)
@@ -450,10 +456,20 @@ def sendMessage(myContact, editor):
     # store this in conversations directory
     fileName = dataDir+"conversations/msg"+myContact
 
-    ret = os.system(editor+" "+fileName)
-    if ret != 0:
-        print "Error in opening message file."
-        exit(2)
+    if text == "":
+        ret = os.system(editor+" "+fileName)
+        if ret != 0:
+            print "Error in opening message file."
+            exit(2)
+    else:
+        # use the short message typed by the user at the prompt
+        try:
+            f = open(fileName, 'w')
+            f.write(text)
+            f.close()
+        except:
+            print "Error composing your file on disc."
+            exit(1)
 
 
     # prompt if they want to send or not
