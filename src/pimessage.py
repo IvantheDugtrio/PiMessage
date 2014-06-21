@@ -154,19 +154,18 @@ def parseOpts(argv, editCmd):
             print "Invalid number of operands for %s option" % primOpt
             usage(scriptName)
             exit(1)
+        val = readConvo(secOpt)
+        exit(val)
 
-        print "second option is", secOpt
-        print("Under construction.")
-        exit(3)
     elif primOpt == "rm-convo": # delete a conversation
         if secOpt == NULL_ARGUMENT:
             print "Invalid number of operands for %s option" % primOpt
             usage(scriptName)
             exit(1)
 
-        print "second option is", secOpt
-        print("Under construction.")
-        exit(3)
+        val = rmConvo(secOpt)
+        exit(val)
+
     elif primOpt == "resend": # resend a failed message
         if secOpt == NULL_ARGUMENT:
             print "Invalid number of operands for %s option" % primOpt
@@ -358,6 +357,38 @@ def rmContact(name):
 #    return 0
 
 
+
+def readConvo(myContact):
+    # Read the saved conversation with this contact if one exists
+    # Display a message to indicate if no conversation exists
+
+    convFile = dataDir+"conversations/"+myContact+".conv"
+
+    try:
+        # If file can't be read, than we should return immediately
+        f = open(convFile, 'r')
+        f.close()
+    except:
+        print "It appears that you don't currently have a conversation with", myContact
+        return 0
+
+    return os.system("less "+convFile)
+
+def rmConvo(myContact):
+    # Delete the conversation for this contact
+    # Display a message to indicate if no conversation exists
+
+    convFile = dataDir+"conversations/"+myContact+".conv"
+
+    try:
+        # If file can't be read, than we should return immediately
+        f = open(convFile, 'r')
+        f.close()
+    except:
+        print "No conversation for", myContact, "could be found."
+        return 1
+
+    return os.system("rm "+convFile)
 
 def sendMessage(myContact, editor):
     # fetch sender IP
