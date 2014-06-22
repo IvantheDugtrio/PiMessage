@@ -195,13 +195,21 @@ def parseOpts(argv, editCmd):
         # contacts of the form:
         # Adam Smith\t1.2.3.4
         # Betty Rogers\t98.76.54.321
+        s = secOpt
+        t = grabOpt(argv, 3)
 
         # Display the contact list in less
-        if secOpt == "-a":
-            # show IP addresses in output
+        if (s == "-a" and t == "-o") or (s == "-o" and t == "-a"):
+            # stdout, show IP addresses
+            os.system("cat "+dataDir+"contacts")
+        elif s == "-a" and t != "-o":
+            # display in less, show IP addresses
             os.system("less "+dataDir+"contacts")
+        elif s == "-o" and t != "-o":
+            # stdout, no IP addresses
+            os.system("sed 's/\t.*$//' " + dataDir+"contacts")
         else:
-            # remove IP addresses from output
+            # display in less, no IP addresses
             os.system("sed 's/\t.*$//' " + dataDir+"contacts | less")
 
         exit(0)
@@ -282,8 +290,8 @@ read                   CONTACT             read a conversation
 rm-convo               CONTACT             delete a conversation
 resend                 CONTACT             resend a failed message
 force-link             CONTACT, IP         force-link contact to IP
-config                 VARIABLE, VALUE     configure varialbles
-contacts               [-a]                view contact list [with IPs]
+config                 VARIABLE, VALUE     configure variables
+contacts               [-a, -o]            view contact list [with IPs]
 add                    CONTACT, IP         add a contact
 rm-contact             CONTACT             delete a contact
 

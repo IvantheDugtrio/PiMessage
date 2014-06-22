@@ -58,11 +58,13 @@ def saveMessage(msgString, mode):
 
     # find out who wrote this file
     contact = nameFromIp(othAddress)
+    if contact == "":
+        contact = othAddress
     dataDir = "/home/"+getUser()+"/.pimessage/"
     convFile = dataDir+"conversations/"+contact+".conv"
-
     if mode == "send":
         contact = "You"
+
 
     # write the newly received message to disc
     try:
