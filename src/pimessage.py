@@ -134,6 +134,14 @@ def parseOpts(argv, editCmd):
         exit(0)
     elif primOpt == "ip": # show host IP address
         print hostIp # a global value
+    elif primOpt == "logo":
+        # This is a secret option to display the Raspberry Pi ASCII logo
+        showLogo()
+        exit(0)
+    elif primOpt == "kill":
+        # This is a secret option to kill the daemon
+        status = killDaemon()
+        exit(status)
 
     elif primOpt == "history" or primOpt == "recent":
         # show recent chat history
@@ -357,22 +365,33 @@ def rmContact(name):
     return 0
 
 
+def showLogo():
+    msg = """
+                                   PiMessage
+                                   ---------
 
-#    # Raspberry Pi logo
-#    print(string.center("   .~~.   .~~.   ", width))
-#    print(string.center("  '. \ ' ' / .'  ", width))
-#    print(string.center("   .~ .~~~..~.   ", width))
-#    print(string.center("  : .~.'~'.~. :  ", width))
-#    print(string.center(" ~ (   ) (   ) ~ ", width))
-#    print(string.center("( : '~'.~.'~' : )", width))
-#    print(string.center(" ~ .~ (   ) ~. ~ ", width))
-#    print(string.center("  (  : '~' :  )  ", width))
-#    print(string.center("   '~ .~~~. ~'   ", width))
-#    print(string.center("       '~'       ", width))
-#    print("")
-#
-#    raw_input("Press enter to continue... ")
-#    return 0
+                                  .~~.   .~~.
+                                 '. \ ' ' / .'
+                                  .~ .~~~..~.
+                                 : .~.'~'.~. :
+                                ~ (   ) (   ) ~
+                               ( : '~'.~.'~' : )
+                                ~ .~ (   ) ~. ~
+                                 (  : '~' :  )
+                                  '~ .~~~. ~'
+                                      '~'
+
+"""
+    print msg
+    return
+
+def killDaemon():
+    # This will kill the PiMessage daemon
+    # Note: this is NOT recommended for normal use
+
+    dirPath = os.path.dirname(sys.argv[0])
+    runScript = dirPath + "/killDaemon"
+    return os.system(runScript)
 
 
 
