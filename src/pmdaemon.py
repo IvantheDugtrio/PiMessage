@@ -25,9 +25,13 @@ if serverIp == ip.IP_FAILURE:
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-server_address = (serverIp, 10000)
+server_address = (serverIp, ip.PORT_NUM)
 
-sock.bind(server_address)
+try:
+    sock.bind(server_address)
+except:
+    print "Error: Unable to start PiMessage Daemon."
+    exit(1)
 
 # listen for incoming connections
 sock.listen(1)

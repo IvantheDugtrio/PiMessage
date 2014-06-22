@@ -529,8 +529,12 @@ def sendMessage(myContact, editor, text="", shouldCompose=True):
 
     s = socket.socket()
     host = socket.gethostname()
-    port = 10000
-    s.connect((recIp, port))
+    port = ip.PORT_NUM
+    try:
+        s.connect((recIp, port))
+    except:
+        print "Error: Unable to send message. Perhaps you have an incorrect IP address?"
+        exit(4)
 
     try:
         s.sendall(msgString)

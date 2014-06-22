@@ -4,6 +4,7 @@ import subprocess
 import re
 
 IP_FAILURE = 1
+PORT_NUM = 10000
 
 def stringSlice(inString, searchString):
     # slices the input string so that the searchString is the beginning of
