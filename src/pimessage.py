@@ -91,9 +91,31 @@ def initNewUser(user, homedir):
     # todo
 
 
-    # Get user input
+    myEdit = "vim"
+    for k in [0, 1, 2, 3]:
+        if k == 3:
+            print "Error: too many tries for editor."
+            exit(1)
+        # Get user input
+        resp = raw_input("What is your preferred text editor? Press enter to default to vim, enter 'cancel' to cancel the installation. ")
+        if resp == "cancel" or resp == "'cancel'":
+            # cancel the installation now
+            exit(1)
+        elif resp == "":
+            print "Using vim is the default editor."
+            break
+        else:
+            # check if their editor is a valid command
+            val = os.system("which "+resp+" >/dev/null 2>&1")
+            if val == 0:
+                break
+            else:
+                print resp, "is not a recognized command."
+
     # write info to files
-    open(homedir+"editor", 'w').write("vim") # doesn't terminate in newline
+    f = open(homedir+"editor", 'w')
+    f.write(myEdit) # doesn't terminate in newline
+    f.close()
 
     if os.system("test -d " + homedir + "conversations") != 0:
         if mdUnix(homedir + "conversations") == DIR_FAILURE:
@@ -259,6 +281,24 @@ def parseOpts(argv, editCmd):
             ret = rmConvo(secOpt)
 
         exit(ret)
+
+    elif primOpt == "config":
+        thirdOpt = grabOpt(argv, 3)
+        if thirdOpt == NULL_ARGUMENT:
+            print "Invalid number of operands for %s option" % primOpt
+            usage(scriptName)
+            exit(1)
+
+        if secOpt == "editor":
+            if os.system("which "+thirdOpt+" >/dev/null 2>&1") == 0:
+                with open(dataDir+"editor", 'w') as f:
+                    f.write(thirdOpt)
+            else:
+                print "Error: %s is not a recognized command." % thirdOpt
+
+        else:
+            print "Unknown variable. Cannot config."
+            exit(1)
 
     else:
         # some invalid option
