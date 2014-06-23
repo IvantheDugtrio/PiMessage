@@ -143,7 +143,8 @@ def install(scriptName, user, homedir):
         # must append alias command
         try:
             f = open("/home/"+user+"/.bashrc", 'a')
-            f.write('alias pimessage='+scriptName)
+            f.write("\n# For PiMessage -- do not delete\n")
+            f.write("alias pimessage="+scriptName+"\n")
             f.close()
         except:
             print "Error applying shell alias for pimessage"
@@ -155,11 +156,14 @@ def install(scriptName, user, homedir):
         # must append alias command
         try:
             f = open("/home/"+user+"/.profile", 'a')
-            f.write(dirPath+"/pmdaemon.py &")
+            f.write("\n#start pimessage daemon\n")
+            f.write(dirPath+"/pmdaemon.py &\n")
             f.close()
         except:
             print "Error loading PiMessage daemon in .profile"
 
+        # start the daemon manually this time
+        os.system(dirPath+"/pmdaemon.py &")
 
 
 
