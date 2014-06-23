@@ -55,7 +55,7 @@ def mdUnix(name):
     else:
         return 0
 
-def initNewUser(user, homedir):
+def install(scriptName, user, homedir):
     print "Initializing new user"
 
     # Let's make sure everyone knows for sure that this is being installed
@@ -91,23 +91,28 @@ def initNewUser(user, homedir):
     # todo
 
 
-    myEdit = "vim"
+    if os.system("which vim >/dev/null 2>&1") == 0:
+        myEdit = "vim"
+    else:
+        myEdit = "nano"
+
     for k in [0, 1, 2, 3]:
         if k == 3:
             print "Error: too many tries for editor."
             exit(1)
         # Get user input
-        resp = raw_input("What is your preferred text editor? Press enter to default to vim, enter 'cancel' to cancel the installation. ")
+        resp = raw_input("What is your preferred text editor? Press enter to default to "+myEdit+", enter 'cancel' to cancel the installation. ")
         if resp == "cancel" or resp == "'cancel'":
             # cancel the installation now
             exit(1)
         elif resp == "":
-            print "Using vim is the default editor."
+            print "Selecting", myEdit
             break
         else:
             # check if their editor is a valid command
             val = os.system("which "+resp+" >/dev/null 2>&1")
             if val == 0:
+                myEdit = resp
                 break
             else:
                 print resp, "is not a recognized command."
@@ -125,12 +130,40 @@ def initNewUser(user, homedir):
             os.system("chmod 700 " + homedir + "conversations")
 
 
-    open(homedir+"contacts", 'w').write("") # doesn't terminate in newline
+    f = open(homedir+"contacts", 'w')
+    f.write("") # doesn't terminate in newline
+    f.close()
+    dirPath = os.path.dirname(sys.argv[0])
+    scriptName = os.path.abspath(dirPath)+"/pimessage.py"
+
+    # alias `pimessage' to point to this script
+    #grepAlias = ["grep", "alias \+pimessage=", "/home/"+user+"/.bashrc"]
+    grepAlias = ["grep", "^alias \+pimessage="+scriptName, "/home/"+user+"/.bashrc"]
+    grepResults = subprocess.Popen(grepAlias, stdout=subprocess.PIPE).communicate()[0]
+    if grepResults == "":
+        # must append alias command
+        try:
+            f = open("/home/"+user+"/.bashrc", 'a')
+            f.write('alias pimessage='+scriptName)
+            f.close()
+        except:
+            print "Error applying shell alias for pimessage"
+
+
 
     print "PiMessage has been successfully installed."
-
-
     exit(0)
+
+
+def uninstall():
+    status = os.system('rm -r -f '+dataDir)
+    if status != 0:
+        print "Error removing PiMessage."
+        print "Remove by deleting", dataDir
+    else:
+        print "PiMessage has been successfully uninstalled."
+    return status
+
 
 def grabOpt(argv, n):
     # returns the nth arg or returns NULL_ARGUMENT
@@ -163,6 +196,10 @@ def parseOpts(argv, editCmd):
     elif primOpt == "kill":
         # This is a secret option to kill the daemon
         status = killDaemon()
+        exit(status)
+    elif primOpt == "uninstall":
+        # This is a secret option to completely remove PiMessage
+        status = uninstall()
         exit(status)
 
     elif primOpt == "history" or primOpt == "recent":
@@ -644,9 +681,16 @@ def main(argv):
 
     global dataDir
     dataDir = "/home/" + username + "/.pimessage/"
+
+    firstOpt = grabOpt(argv, 1)
+    if firstOpt == "uninstall":
+        exit(uninstall() )
+
+
+    scriptName = argv[0]
     dirExistsCommand = "test -d " + dataDir
     if os.system(dirExistsCommand) != 0:
-        initNewUser(username, dataDir)
+        install(scriptName, username, dataDir)
 
     dirFiles = subprocess.Popen(['ls', '-A', dataDir], stdout=subprocess.PIPE).communicate()[0]
 
@@ -657,7 +701,7 @@ editor
 """
 
     if dirFiles != CORRECT_DIR_FILES:
-        initNewUser(username, dataDir)
+        install(scriptName, username, dataDir)
 
     # get user's chosen editor
     editCommand = open(dataDir+"editor", 'r').read().rstrip('\n')
