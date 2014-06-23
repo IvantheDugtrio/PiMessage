@@ -557,8 +557,8 @@ def rmConvo(myContact):
 
 def sendMessage(myContact, editor, text="", shouldCompose=True):
     # fetch sender IP
-    if hostIp == IP_FAILURE:
-        exit(1)
+    #if hostIp == IP_FAILURE:
+    #    exit(1)
 
     # fetch recipient IP
 
@@ -602,12 +602,12 @@ def sendMessage(myContact, editor, text="", shouldCompose=True):
 
 
     # prompt if they want to send or not
-    shouldSend = raw_input("To send or not to send; that is the question (y/n): ")
+    #shouldSend = raw_input("To send or not to send; that is the question (y/n): ")
 
-    ss = shouldSend
-    if ss != "y" and ss != "Y" and ss != "yes" and ss != "Yes" and ss != "YES":
-        print "Your message has been saved for next time you compose a message to %s" % myContact
-        exit(5)
+    #ss = shouldSend
+    #if ss != "y" and ss != "Y" and ss != "yes" and ss != "Yes" and ss != "YES":
+    #    print "Your message has been saved for next time you compose a message to %s" % myContact
+    #    exit(5)
 
     # get time stamp in proper format
     sendTime = str(time.time())
@@ -629,46 +629,48 @@ def sendMessage(myContact, editor, text="", shouldCompose=True):
 
     # Send the full message
 
-    s = socket.socket()
-    host = socket.gethostname()
-    port = ip.PORT_NUM
-    try:
-        s.connect((recIp, port))
-    except:
-        print "Error: Unable to send message. Perhaps you have an incorrect IP address?"
-        exit(4)
+    if hostIp != IP_FAILURE:
+        s = socket.socket()
+        host = socket.gethostname()
+        port = ip.PORT_NUM
+        try:
+            s.connect((recIp, port))
+        except:
+            print "Error: Unable to send message. Perhaps you have an incorrect IP address?"
+            exit(4)
 
-    try:
-        s.sendall(msgString)
+        try:
+            s.sendall(msgString)
 
-        amount_received = 0
-        amount_expected = len(msgString)
-        packets = []
+            amount_received = 0
+            amount_expected = len(msgString)
+            packets = []
 
-        while amount_received < amount_expected:
-            data = s.recv(16)
-            amount_received += len(data)
-            packets.append(data)
+            while amount_received < amount_expected:
+                data = s.recv(16)
+                amount_received += len(data)
+                packets.append(data)
 
-    finally:
-        s.close()   # Close the socket when done
-        recvMsg = "".join(packets)
+        finally:
+            s.close()   # Close the socket when done
+            recvMsg = "".join(packets)
 
-        if msgString != recvMsg:
-            print "There may be an error with the data sent"
+            if msgString != recvMsg:
+                print "There may be an error with the data sent"
 
-    # add the message to conversation history
-    ret = utils.saveMessage(msgString, "send")
-    if ret == utils.TUPLE_FAIL:
-        print "failure in saving your message."
+        # add the message to conversation history
+        ret = utils.saveMessage(msgString, "send")
+        if ret == utils.TUPLE_FAIL:
+            print "failure in saving your message."
 
 
-
-    # clean up by removing old message to contact
-    ret = os.system("rm "+fileName)
-    if ret != 0:
-        print "Error in removing message file."
-        exit(2)
+        # clean up by removing old message to contact
+        ret = os.system("rm "+fileName)
+        if ret != 0:
+            print "Error in removing message file."
+            exit(2)
+    else:
+        print "Please connect to a network to send your message."
 
 
     return 0
@@ -690,7 +692,7 @@ def main(argv):
         if underScoreIndex != -1:
             operatingSystem = operatingSystem[:underScoreIndex]
 
-    if operatingSystem != "Linux" and operatingSystem != "Darwin" and operatingSystem != "CYGWIN":
+    if operatingSystem != "Linux" and operatingSystem != "Darwin": # and operatingSystem != "CYGWIN":
         print "Error: %s is not a supported operating system at this time." % operatingSystem
         exit(5)
 
@@ -728,20 +730,12 @@ editor
 
     global hostIp
     hostIp = ip.getHostIp()
-    if hostIp == IP_FAILURE:
-        print "Error: your IP address could not be correctly retrieved."
-        exit(2)
-
-    # get number of rows and number of columns on terminal
-    #screenRows, screenColumns = os.popen('stty size', 'r').read().split()
-    #screenRows = int(screenRows)
-    #screenColumns = int(screenColumns)
+    #if hostIp == IP_FAILURE:
+    #    print "Error: your IP address could not be correctly retrieved."
+    #    exit(2)
 
 
     ## User must already have information entered
-
-    #keyPress = welcomeScreen(hostIp, screenColumns)
-
 
 
     ## Option parsing ##

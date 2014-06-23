@@ -30,7 +30,7 @@ server_address = (serverIp, ip.PORT_NUM)
 try:
     sock.bind(server_address)
 except:
-    print "Error: Unable to start PiMessage Daemon."
+    print "Error: Unable to start PiMessage Daemon. Perhaps it's already running?"
     exit(1)
 
 # listen for incoming connections
