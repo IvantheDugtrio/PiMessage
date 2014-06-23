@@ -133,11 +133,10 @@ def install(scriptName, user, homedir):
     f = open(homedir+"contacts", 'w')
     f.write("") # doesn't terminate in newline
     f.close()
-    dirPath = os.path.dirname(sys.argv[0])
-    scriptName = os.path.abspath(dirPath)+"/pimessage.py"
+    dirPath = os.path.abspath(os.path.dirname(sys.argv[0]) )
+    scriptName = dirPath+"/pimessage.py"
 
     # alias `pimessage' to point to this script
-    #grepAlias = ["grep", "alias \+pimessage=", "/home/"+user+"/.bashrc"]
     grepAlias = ["grep", "^alias \+pimessage="+scriptName, "/home/"+user+"/.bashrc"]
     grepResults = subprocess.Popen(grepAlias, stdout=subprocess.PIPE).communicate()[0]
     if grepResults == "":
@@ -148,6 +147,20 @@ def install(scriptName, user, homedir):
             f.close()
         except:
             print "Error applying shell alias for pimessage"
+
+    # start pmdaemon at startup
+    grepDaemon = ["grep", "^"+dirPath+"/pmdaemon.py", "/home/"+user+"/.profile"]
+    grepResults = subprocess.Popen(grepDaemon, stdout=subprocess.PIPE).communicate()[0]
+    if grepResults == "":
+        # must append alias command
+        try:
+            f = open("/home/"+user+"/.profile", 'a')
+            f.write(dirPath+"/pmdaemon.py &")
+            f.close()
+        except:
+            print "Error loading PiMessage daemon in .profile"
+
+
 
 
 
