@@ -173,10 +173,37 @@ def install(scriptName, user, homedir):
 
 
 def uninstall():
+    user = utils.getUser()
     status = os.system('rm -r -f '+dataDir)
+
+    if status != 0:
+        print "Error in removing ~/.pimessage"
+
+    # replace .profile
+    try:
+        f = open("/home/"+user+"/.profile", 'r')
+        buf = f.read()
+        f.close()
+
+        # process buffer
+        dirPath = os.path.abspath(os.path.dirname(sys.argv[0]) )
+        searchString = dirPath+"/pmdaemon.py &\n"
+        idx = buf.find(searchString)
+        ret = buf[0:idx]
+        buf = ret
+
+        f = open("/home/"+user+"/.profile", 'w')
+        f.write(buf)
+        f.close()
+
+
+    except:
+        print "Error in handling ~/.profile"
+        status = 1
+
+
     if status != 0:
         print "Error removing PiMessage."
-        print "Remove by deleting", dataDir
     else:
         print "PiMessage has been successfully uninstalled."
     return status
