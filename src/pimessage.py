@@ -154,16 +154,17 @@ def install(scriptName, user, homedir):
     grepResults = subprocess.Popen(grepDaemon, stdout=subprocess.PIPE).communicate()[0]
     if grepResults == "":
         # must append alias command
+        startDaemonCmd = dirPath+"/pmdaemon.py 2>>/home/"+user+"/.pimessage/daemonError.log &"
         try:
             f = open("/home/"+user+"/.profile", 'a')
             f.write("\n#start pimessage daemon\n")
-            f.write(dirPath+"/pmdaemon.py &\n")
+            f.write(startDaemonCmd+"\n")
             f.close()
         except:
             print "Error loading PiMessage daemon in .profile"
 
         # start the daemon manually this time
-        os.system(dirPath+"/pmdaemon.py &")
+        os.system(startDaemonCmd)
 
 
 
@@ -743,6 +744,7 @@ def main(argv):
     # must be in correct ls -A order
     CORRECT_DIR_FILES = """contacts
 conversations
+daemonError.log
 editor
 """
 
