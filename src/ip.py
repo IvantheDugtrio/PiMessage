@@ -32,7 +32,7 @@ def getHostIp():
     ## slice the cmdOutput string:
     modifiedOutput = stringSlice(cmdOutput, "wlan0")
     if modifiedOutput == "":
-        modifiedOutput = stringSlice(cmdOutpt, "eth0")
+        modifiedOutput = stringSlice(cmdOutput, "eth0")
         if modifiedOutput == "":
             return IP_FAILURE
 
