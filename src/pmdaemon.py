@@ -6,6 +6,7 @@ import sys
 import ip # local file
 import utils
 import datetime
+import time
 
 """
 This is the PiMessage daemon. This acts as a server running on every user's
@@ -23,14 +24,18 @@ def errLog(msg):
     errMsg = '\t'.join([formattedStamp, msg])
     print >>sys.stderr, errMsg
 
-#print >>sys.stdout, "Starting pmdaemon" # DEBUG
+#errLog("Starting pmdaemon") # DEBUG
 
 # fetch IP address of machine
 serverIp = ip.getHostIp()
-if serverIp == ip.IP_FAILURE:
-    #print >>sys.stderr, "Error: Unable to start PiMessage Daemon."
-    #print >>sys.stderr, "IP address could not be found"
-    errLog("Error: Unable to start PiMessage Daemon.")
+k = 0
+while serverIp == ip.IP_FAILURE and k < 360:
+    time.sleep(5)
+    serverIp = ip.getHostIp()
+    k = k + 1
+
+if k >= 360:
+    errLog("Error: PiMessage Daemon timed out. Unable to start.")
     errLog("IP address could not be found")
     exit(1)
 
@@ -41,7 +46,6 @@ server_address = (serverIp, ip.PORT_NUM)
 try:
     sock.bind(server_address)
 except:
-    #print >>sys.stderr, "Error: Unable to start PiMessage Daemon. Perhaps it's already running?"
     errLog("Error: Unable to start PiMessage Daemon. Perhaps it's already running?")
     exit(1)
 
@@ -76,7 +80,6 @@ while True:
             ret = utils.saveMessage(message, "rec")
             if ret == utils.TUPLE_FAIL:
                 # log the error
-                #print >>sys.stdout, "There was an error saving your message."
                 errLog("There was an error saving your message.")
 
             # inform the user that they got a pimessage
