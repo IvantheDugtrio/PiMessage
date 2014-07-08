@@ -748,7 +748,12 @@ daemonError.log
 editor
 """
 
-    if dirFiles != CORRECT_DIR_FILES:
+    ALT_DIR_FILES = """contacts
+conversations
+editor
+"""
+
+    if dirFiles != CORRECT_DIR_FILES and dirFiles != ALT_DIR_FILES:
         install(scriptName, username, dataDir)
 
     # get user's chosen editor
