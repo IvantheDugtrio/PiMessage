@@ -411,24 +411,13 @@ compose, new           CONTACT [-m "msg"]  compose & send message
 read                   CONTACT             read a conversation
 rm-convo               CONTACT             delete a conversation
 resend                 CONTACT             resend a failed message
-force-link             CONTACT, IP         force-link contact to IP
+force-link             CONTACT   IP        force-link contact to IP
 config                 VARIABLE, VALUE     configure variables
-contacts               [-a, -o]            view contact list [with IPs]
-add                    CONTACT, IP         add a contact
+contacts               [-a or -o]          view contact list [with IPs]
+add                    CONTACT   IP        add a contact
 rm-contact             CONTACT             delete a contact
 
 """
-
-#-i , --show-ip                   Show your IP address
-#-s , --history                   Show your recent chat history
-#-c , --compose     CONTACT       Compose & send message
-#-r , --read        CONTACT       Read a conversation
-#-d , --delete      CONTACT       Delete a conversation
-#-q , --resend      CONTACT       Resend a failed message
-#-h , --help                      Help
-#-f , --force-link  CONTACT, IP   Specify the IP address to try for CONTACT
-#
-#    """
 
     print(optionMsg)
 
