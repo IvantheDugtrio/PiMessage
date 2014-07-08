@@ -22,7 +22,8 @@ def stringSlice(inString, searchString):
     return returner
 
 def getHostIp():
-    # returns IP_FAILURE if no address was found
+    # Returns the user's WLAN or LAN ip address if connected to a network
+    # Returns IP_FAILURE if no address was found
 
     ipaddress = IP_FAILURE # default case
     cmdOutput = subprocess.Popen('ifconfig', stdout=subprocess.PIPE).communicate()[0]
@@ -30,16 +31,18 @@ def getHostIp():
 
     ## slice the cmdOutput string:
     modifiedOutput = stringSlice(cmdOutput, "wlan0")
-    if (modifiedOutput == ""):
-        return IP_FAILURE
+    if modifiedOutput == "":
+        modifiedOutput = stringSlice(cmdOutpt, "eth0")
+        if modifiedOutput == "":
+            return IP_FAILURE
 
     modifiedOutput = stringSlice(modifiedOutput, "inet")
-    if (modifiedOutput == ""):
+    if modifiedOutput == "":
         return IP_FAILURE
 
     # slice the cmdOutput string:
     modifiedOutput = stringSlice(modifiedOutput, ":")
-    if (modifiedOutput == ""):
+    if modifiedOutput == "":
         return IP_FAILURE
 
     ## perhaps there is a good way to clean this up? ##
