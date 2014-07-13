@@ -55,7 +55,7 @@ def mdUnix(name):
     else:
         return 0
 
-def install(scriptName, user, homedir):
+def install(scriptName, homedir):
     print "Initializing new user"
 
     # Let's make sure everyone knows for sure that this is being installed
@@ -176,7 +176,6 @@ def install(scriptName, user, homedir):
 
 
 def uninstall():
-    user = utils.getUser()
     status = os.system('rm -r -f '+dataDir)
 
     if status != 0:
@@ -716,7 +715,6 @@ def main(argv):
         print "Error: %s is not a supported operating system at this time." % operatingSystem
         exit(5)
 
-    username = utils.getUser()
 
     global dataDir
     dataDir = os.path.join(utils.getHomeDir(), ".pimessage/")
@@ -729,7 +727,7 @@ def main(argv):
     scriptName = argv[0]
     dirExistsCommand = "test -d " + dataDir
     if os.system(dirExistsCommand) != 0:
-        install(scriptName, username, dataDir)
+        install(scriptName, dataDir)
 
     dirFiles = subprocess.Popen(['ls', '-A', dataDir], stdout=subprocess.PIPE).communicate()[0]
 
@@ -746,7 +744,7 @@ editor
 """
 
     if dirFiles != CORRECT_DIR_FILES and dirFiles != ALT_DIR_FILES:
-        install(scriptName, username, dataDir)
+        install(scriptName,  dataDir)
 
     # get user's chosen editor
     editCommand = open(dataDir+"editor", 'r').read().rstrip('\n')
