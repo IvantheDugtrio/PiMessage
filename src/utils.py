@@ -8,22 +8,26 @@ program
 
 """
 
+import os
 import subprocess
 import time
 import datetime
 
 TUPLE_FAIL = (None, None)
 
-def getUser():
-    username = subprocess.Popen('whoami', stdout=subprocess.PIPE).communicate()[0]
-    username = username.rstrip('\n') # removes trailing newline
-    return username
+#def getUser():
+#    username = subprocess.Popen('whoami', stdout=subprocess.PIPE).communicate()[0]
+#    username = username.rstrip('\n') # removes trailing newline
+#    return username
+
+def getHomeDir():
+    return os.path.expanduser("~")
 
 def nameFromIp(ip):
     # returns the name associated with the ip address
     # returns empty string on failure
 
-    dataDir = "/home/"+getUser()+"/.pimessage/"
+    dataDir = os.path.join(getHomeDir(),".pimessage/")
     name = ""
     with open(dataDir+"contacts") as fp:
         for line in fp:
@@ -60,7 +64,7 @@ def saveMessage(msgString, mode):
     contact = nameFromIp(othAddress)
     if contact == "":
         contact = othAddress
-    dataDir = "/home/"+getUser()+"/.pimessage/"
+    dataDir = os.path.join(getHomeDir(),".pimessage/")
     convFile = dataDir+"conversations/"+contact+".conv"
     if mode == "send":
         contact = "You"

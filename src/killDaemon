@@ -27,7 +27,7 @@ elif [ $nLines -ge 2 ]; then
     # Choose the first line and parse for the pid
     firstLine=`echo "$processes" | head -n 1`
     pid=`echo "$firstLine" | sed 's/^[^ ]\+[ ]\+\([0-9]\+\)[ ]\+.*$/\1/'`
-    
+
     # kill that process
     kill "$pid"
     result=$?

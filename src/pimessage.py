@@ -55,7 +55,7 @@ def mdUnix(name):
     else:
         return 0
 
-def install(scriptName, user, homedir):
+def install(scriptName, homedir):
     print "Initializing new user"
 
     # Let's make sure everyone knows for sure that this is being installed
@@ -137,12 +137,13 @@ def install(scriptName, user, homedir):
     scriptName = dirPath+"/pimessage.py"
 
     # alias `pimessage' to point to this script
-    grepAlias = ["grep", "^alias \+pimessage="+scriptName, "/home/"+user+"/.bashrc"]
+    _bashrc = os.path.join(utils.getHomeDir(), ".bashrc")
+    grepAlias = ["grep", "^alias \+pimessage="+scriptName, _bashrc]
     grepResults = subprocess.Popen(grepAlias, stdout=subprocess.PIPE).communicate()[0]
     if grepResults == "":
         # must append alias command
         try:
-            f = open("/home/"+user+"/.bashrc", 'a')
+            f = open(_bashrc, 'a')
             f.write("\n# For PiMessage -- do not delete\n")
             f.write("alias pimessage="+scriptName+"\n")
             f.close()
@@ -150,13 +151,14 @@ def install(scriptName, user, homedir):
             print "Error applying shell alias for pimessage"
 
     # start pmdaemon at startup
-    grepDaemon = ["grep", "^"+dirPath+"/pmdaemon.py", "/home/"+user+"/.profile"]
+    _profile = os.path.join(utils.getHomeDir(), ".profile")
+    grepDaemon = ["grep", "^"+dirPath+"/pmdaemon.py", _profile]
     grepResults = subprocess.Popen(grepDaemon, stdout=subprocess.PIPE).communicate()[0]
     if grepResults == "":
         # must append alias command
-        startDaemonCmd = dirPath+"/pmdaemon.py 2>>/home/"+user+"/.pimessage/daemonError.log &"
+        startDaemonCmd = dirPath+"/pmdaemon.py &"
         try:
-            f = open("/home/"+user+"/.profile", 'a')
+            f = open(_profile, 'a')
             f.write("\n#start pimessage daemon\n")
             f.write(startDaemonCmd+"\n")
             f.close()
@@ -174,7 +176,6 @@ def install(scriptName, user, homedir):
 
 
 def uninstall():
-    user = utils.getUser()
     status = os.system('rm -r -f '+dataDir)
 
     if status != 0:
@@ -182,7 +183,8 @@ def uninstall():
 
     # replace .profile
     try:
-        f = open("/home/"+user+"/.profile", 'r')
+        _profile = os.path.join(utils.getHomeDir(), ".profile")
+        f = open(_profile, 'r')
         buf = f.read()
         f.close()
 
@@ -193,7 +195,7 @@ def uninstall():
         ret = buf[0:idx]
         buf = ret
 
-        f = open("/home/"+user+"/.profile", 'w')
+        f = open(_profile, 'w')
         f.write(buf)
         f.close()
 
@@ -713,10 +715,9 @@ def main(argv):
         print "Error: %s is not a supported operating system at this time." % operatingSystem
         exit(5)
 
-    username = utils.getUser()
 
     global dataDir
-    dataDir = "/home/" + username + "/.pimessage/"
+    dataDir = os.path.join(utils.getHomeDir(), ".pimessage/")
 
     firstOpt = grabOpt(argv, 1)
     if firstOpt == "uninstall":
@@ -726,7 +727,7 @@ def main(argv):
     scriptName = argv[0]
     dirExistsCommand = "test -d " + dataDir
     if os.system(dirExistsCommand) != 0:
-        install(scriptName, username, dataDir)
+        install(scriptName, dataDir)
 
     dirFiles = subprocess.Popen(['ls', '-A', dataDir], stdout=subprocess.PIPE).communicate()[0]
 
@@ -743,7 +744,7 @@ editor
 """
 
     if dirFiles != CORRECT_DIR_FILES and dirFiles != ALT_DIR_FILES:
-        install(scriptName, username, dataDir)
+        install(scriptName,  dataDir)
 
     # get user's chosen editor
     editCommand = open(dataDir+"editor", 'r').read().rstrip('\n')
