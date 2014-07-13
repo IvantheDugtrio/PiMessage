@@ -8,6 +8,7 @@ program
 
 """
 
+import os
 import subprocess
 import time
 import datetime
@@ -18,6 +19,9 @@ def getUser():
     username = subprocess.Popen('whoami', stdout=subprocess.PIPE).communicate()[0]
     username = username.rstrip('\n') # removes trailing newline
     return username
+
+def getHomeDir():
+    return os.path.expanduser("~")
 
 def nameFromIp(ip):
     # returns the name associated with the ip address

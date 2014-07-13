@@ -7,6 +7,7 @@ import ip # local file
 import utils
 import datetime
 import time
+import os
 
 """
 This is the PiMessage daemon. This acts as a server running on every user's
@@ -16,13 +17,18 @@ computer to receive PiMessages sent over LAN.
 
 """
 
+ERR_FILE = os.path.join(utils.getHomeDir(), ".pimessage", "daemonError.log")
+
 def errLog(msg):
     # log an error with its time followed by the message describing it
 
     now = datetime.datetime.now().time()
     formattedStamp = now.strftime('%H:%M %m/%d/%Y')
     errMsg = '\t'.join([formattedStamp, msg])
-    print >>sys.stderr, errMsg
+    #print >>sys.stderr, errMsg
+    f = open(ERR_FILE, 'a')
+    f.write(errMsg)
+    f.close()
 
 #errLog("Starting pmdaemon") # DEBUG
 
