@@ -182,7 +182,7 @@ def uninstall():
     if status != 0:
         print "Error in removing ~/.pimessage"
 
-    # replace .profile
+    # Remove daemon from .profile
     try:
         _profile = os.path.join(utils.getHomeDir(), ".profile")
         f = open(_profile, 'r')
@@ -207,9 +207,36 @@ def uninstall():
         f.write(buf)
         f.close()
 
-
     except Exception as e:
         print "Error in handling ~/.profile"
+        print "%s" % str(e)
+        status = 1
+
+    # Remove pimessage alias from .bashrc
+    try:
+        _bashrc = os.path.join(utils.getHomeDir(), ".bashrc")
+        f = open(_bashrc, 'r')
+        buf = f.read()
+        f.close()
+
+        # process buffer
+        lines = buf.split('\n')
+        aliasL0 = "# For PiMessage -- do not delete"
+        aliasL1 = "alias pimessage="+dirPath+"/pimessage.py"
+
+        newLines = []
+        for l in lines:
+            if l != aliasL0 and l != aliasL1:
+                newLines.append(l)
+
+        buf = '\n'.join(newLines)
+
+        f = open(_bashrc, 'w')
+        f.write(buf)
+        f.close()
+
+    except Exception as e:
+        print "Error in handling ~/.bashrc"
         print "%s" % str(e)
         status = 1
 
