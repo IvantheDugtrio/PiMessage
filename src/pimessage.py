@@ -96,12 +96,13 @@ def install(scriptName, homedir):
     else:
         myEdit = "nano"
 
+    os.system('clear')
     for k in [0, 1, 2, 3]:
         if k == 3:
             print "Error: too many tries for editor."
             exit(1)
         # Get user input
-        resp = raw_input("What is your preferred text editor? Press enter to default to "+myEdit+", enter 'cancel' to cancel the installation. ")
+        resp = raw_input("\nWhat is your preferred text editor? Press enter to default to "+myEdit+", enter 'cancel' to cancel the installation. ")
         if resp == "cancel" or resp == "'cancel'":
             # cancel the installation now
             exit(1)
@@ -160,7 +161,7 @@ def install(scriptName, homedir):
         flagCmd = dirPath+"/pmdaemon.py -f"
         try:
             f = open(_profile, 'a')
-            f.write('\n'.join(['',"#start pimessage daemon",startDaemonCmd,flagCmd,'']) )
+            f.write('\n'.join(["#start pimessage daemon",startDaemonCmd,flagCmd,'']) )
             f.close()
         except:
             print "Error loading PiMessage daemon in .profile"
@@ -189,19 +190,27 @@ def uninstall():
         f.close()
 
         # process buffer
+        lines = buf.split('\n')
         dirPath = os.path.abspath(os.path.dirname(sys.argv[0]) )
-        searchString = dirPath+"/pmdaemon.py &\n"
-        idx = buf.find(searchString)
-        ret = buf[0:idx]
-        buf = ret
+        daemonL0 = "#start pimessage daemon"
+        daemonL1 = dirPath+"/pmdaemon.py &"
+        daemonL2 = dirPath+"/pmdaemon.py -f"
+
+        newLines = []
+        for l in lines:
+            if l != daemonL0 and l != daemonL1 and l != daemonL2:
+                newLines.append(l)
+
+        buf = '\n'.join(newLines)
 
         f = open(_profile, 'w')
         f.write(buf)
         f.close()
 
 
-    except:
+    except Exception as e:
         print "Error in handling ~/.profile"
+        print "%s" % str(e)
         status = 1
 
 
