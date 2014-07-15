@@ -157,10 +157,10 @@ def install(scriptName, homedir):
     if grepResults == "":
         # must append alias command
         startDaemonCmd = dirPath+"/pmdaemon.py &"
+        flagCmd = dirPath+"/pmdaemon.py -f"
         try:
             f = open(_profile, 'a')
-            f.write("\n#start pimessage daemon\n")
-            f.write(startDaemonCmd+"\n")
+            f.write('\n'.join(['',"#start pimessage daemon",startDaemonCmd,flagCmd,'']) )
             f.close()
         except:
             print "Error loading PiMessage daemon in .profile"
