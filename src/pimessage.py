@@ -673,10 +673,16 @@ def sendMessage(myContact, editor, text="", shouldCompose=True):
     msgLines.append(sendTime) # guaranteed two consecutive newlines
     msgLines.append("")
 
-    with open(fileName) as fp:
-        for line in fp:
-           msgLines.append(line.rstrip('\n') )
-    msgLines.append("")
+    try:
+        with open(fileName) as fp:
+            for line in fp:
+               msgLines.append(line.rstrip('\n') )
+        msgLines.append("")
+    except:
+        # File couldn't be opened, so we can't send
+        # Could be intentional, but notify user anyway
+        print "Your message was not sent."
+        exit(1)
 
     msgString = "\n".join(msgLines)
 
