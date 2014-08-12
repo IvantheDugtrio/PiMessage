@@ -546,9 +546,7 @@ def killDaemon():
     # This will kill the PiMessage daemon
     # Note: this is NOT recommended for normal use
 
-    dirPath = os.path.dirname(sys.argv[0])
-    runScript = dirPath + "/killDaemon"
-    return os.system(runScript)
+    return os.system("killall pmdaemon.py")
 
 
 

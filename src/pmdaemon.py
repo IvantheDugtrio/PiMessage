@@ -2,13 +2,16 @@
 
 import socket
 import sys
+import dbus
 
-import ip # local file
-import utils
 import datetime
 import time
 import os
 import subprocess
+
+# local modules
+import ip
+import utils
 
 """
 This is the PiMessage daemon. This acts as a server running on every user's
@@ -57,6 +60,19 @@ def markFlag():
     f.write("pimessage\n")
     f.close()
     exit(0)
+
+def notify(summary, body='', app_name='', app_icon='',
+        timeout=3000, actions=[], hints=[], replaces_id=0):
+    _bus_name = 'org.freedesktop.Notifications'
+    _object_path = '/org/freedesktop/Notifications'
+    _interface_name = _bus_name
+
+    session_bus = dbus.SessionBus()
+    obj = session_bus.get_object(_bus_name, _object_path)
+    interface = dbus.Interface(obj, _interface_name)
+    interface.Notify(app_name, replaces_id, app_icon,
+        summary, body, actions, hints, timeout)
+
 
 if len(sys.argv) > 1:
     if sys.argv[1] == "-f":
@@ -123,7 +139,15 @@ while True:
                 errLog("There was an error saving your message.")
 
             # inform the user that they got a pimessage
-            # todo
+            friend = utils.nameFromIp(lines[1])
+            if friend == "":
+                friend = lines[1]
+
+            try:
+                notify("New message from "+friend)
+            except:
+                print "New message from", friend
+
 
 
 
