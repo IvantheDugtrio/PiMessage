@@ -5,43 +5,43 @@
 # necessary as part of normal usage of PiMessage. The daemon is normally
 # intended to run in the background
 
-oldIFS=$IFS
-IFS='
-'
+# oldIFS=${IFS}
+# IFS='
+# '
 
-result="0"
+# result="0"
 
-# get the processes matching 'pmdaemon'
-processes=`ps aux | grep 'pmdaemon'`
+# # get the processes matching 'pmdaemon'
+# processes=`ps aux | grep 'pmdaemon'`
 
-# find which process is the correct one
-nLines=`echo "$processes" | wc -l`
+# # find which process is the correct one
+# nLines=`echo "${processes}" | wc -l`
 
-if [ -z "$nLines" ]; then
-    echo "Error in running command. Terminating script." >&2
-    result=1
-elif [ $nLines -lt 2 ]; then
-    echo "pmdaemon is not running" >&2
-    result=0
-elif [ $nLines -ge 2 ]; then
-    # Choose the first line and parse for the pid
-    firstLine=`echo "$processes" | head -n 1`
-    pid=`echo "$firstLine" | sed 's/^[^ ]\+[ ]\+\([0-9]\+\)[ ]\+.*$/\1/'`
+# if [[ -z "${nLines}" ]]; then
+#   echo "Error in running command. Terminating script." >&2
+#   result=1
+# elif [[ ${nLines} -lt 2 ]]; then
+#   echo "pmdaemon is not running" >&2
+#   result=0
+# elif [[ ${nLines} -ge 2 ]]; then
+#   # Choose the first line and parse for the pid
+#   firstLine=`echo "${processes}" | head -n 1`
+#   pid=`echo "${firstLine}" | sed 's/^[^ ]\+[ ]\+\([0-9]\+\)[ ]\+.*$/\1/'`
 
-    # kill that process
-    kill "$pid"
-    result=$?
-    if [ $result == 0 ]; then
-        echo "pmdaemon.py was successfully killed"
-    fi
-fi
+#   # kill that process
+#   kill "${pid}"
+#   result=$?
+#   if [[ ${result} == 0 ]]; then
+#     echo "pmdaemon.py was successfully killed"
+#   fi
+# elif [[ ${nLines} -gt 2 ]]; then
+#   echo "You may need to run the program again to kill all instances of the daemon"
+#   echo "We also found:"
+#   echo "${processes}" | tail -n `let ${nLines}-1`
+#   echo "Running on your system"
+# fi
 
-if [ $nLines -gt 2 ]; then
-    echo "You may need to run the program again to kill all instances of the daemon"
-    echo "We also found:"
-    echo "$processes" | tail -n `let $nLines-1`
-    echo "Running on your system"
-fi
+# IFS=${oldIFS}
+# exit ${result}
 
-IFS=$oldIFS
-exit $result
+killall pmdaemon.py

@@ -9,30 +9,26 @@ program
 """
 
 import os
-import subprocess
-import time
 import datetime
 
 TUPLE_FAIL = (None, None)
 
-#def getUser():
-#    username = subprocess.Popen('whoami', stdout=subprocess.PIPE).communicate()[0]
-#    username = username.rstrip('\n') # removes trailing newline
-#    return username
-
-def getHomeDir():
+def get_home_dir():
+    """Return home directory"""
     return os.path.expanduser("~")
 
-def nameFromIp(ip):
-    # returns the name associated with the ip address
-    # returns empty string on failure
+def ip_to_name(ip_addr):
+    """
+    returns the name associated with the ip_addr address
+    returns empty string on failure
+    """
 
-    dataDir = os.path.join(getHomeDir(),".pimessage/")
+    data_dir = os.path.join(get_home_dir(), ".pimessage/")
     name = ""
-    with open(dataDir+"contacts") as fp:
-        for line in fp:
+    with open(data_dir+"contacts") as fname:
+        for line in fname:
             rec = line.split('\t')
-            if rec[1].rstrip('\n') == ip:
+            if rec[1].rstrip('\n') == ip_addr:
                 name = rec[0]
                 break
 
@@ -40,51 +36,54 @@ def nameFromIp(ip):
     return name
 
 
-def saveMessage(msgString, mode):
-    # This parses the message to save the appropriate message contents into the correct conversation file
-    # This will create that conversation file if necessary
-    # This returns a tuple containing the 'from' IP address and timestamp
-    # Returns TUPLE_FAIL on failure
+def save_msg(msg_str, mode):
+    """
+    This parses the message to save the appropriate message contents into
+    the correct conversation file
+    This will create that conversation file if necessary
+    This returns a tuple containing the 'from' IP address and timestamp
+    @returns TUPLE_FAIL on failure
+    """
 
-    lines = msgString.split('\n')
+    lines = msg_str.split('\n')
 
     # strip off the message's metadata
-    othAddress = ""
+    oth_addr = ""
     if mode == "rec":
-        othAddress = lines[1]
+        oth_addr = lines[1]
     elif mode == "send":
-        othAddress = lines[0]
+        oth_addr = lines[0]
     else:
         return TUPLE_FAIL
 
-    timeStamp = int(float(lines[2]) ) # necessary to truncate
-    msgData = lines[4:]
+    time_stamp = int(float(lines[2])) # necessary to truncate
+    msg_data = lines[4:]
 
     # find out who wrote this file
-    contact = nameFromIp(othAddress)
+    contact = ip_to_name(oth_addr)
     if contact == "":
-        contact = othAddress
-    dataDir = os.path.join(getHomeDir(),".pimessage/")
-    convFile = dataDir+"conversations/"+contact+".conv"
+        contact = oth_addr
+    data_dir = os.path.join(get_home_dir(), ".pimessage/")
+    conv_file = data_dir+"conversations/"+contact+".conv"
     if mode == "send":
         contact = "You"
 
 
     # write the newly received message to disc
     try:
-        f = open(convFile, 'a')
-        f.write(contact+" wrote:\n")
-        for k in msgData:
-            f.write(k+'\n')
+        fname = open(conv_file, 'a')
+        fname.write(contact+" wrote:\n")
+        for k in msg_data:
+            fname.write(k+'\n')
 
-        value = datetime.datetime.fromtimestamp(timeStamp)
-        formattedStamp = value.strftime('%m/%d/%Y %H:%M')
-        f.write(formattedStamp+'\n\n')
+        value = datetime.datetime.fromtimestamp(time_stamp)
+        formatted_stamp = value.strftime('%m/%d/%Y %H:%M')
+        fname.write(formatted_stamp+'\n\n')
 
-        f.close()
-    except:
+        fname.close()
+    except Exception:
         # some sort of error, so let's return failure state
         return TUPLE_FAIL
 
 
-    return (othAddress, timeStamp)
+    return (oth_addr, time_stamp)

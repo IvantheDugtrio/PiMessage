@@ -11,11 +11,7 @@ pi running raspbian OS.
 import subprocess   # for function calls
 import os
 import sys          # for arg parsing
-import string
-import re           # for searching
 import time
-import datetime
-import mmap
 import socket       # for networking
 
 import ip           # local file
@@ -35,31 +31,33 @@ import utils
 
 IP_FAILURE = ip.IP_FAILURE
 DIR_FAILURE = 2
-NULL_ARGUMENT = ""
+NULL_ARGUMENT = ''
 
 ########################
 ##  Global variables  ##
 ########################
 
 # values are listed here, but should not be uncommented
-global hostIp
-global operatingSystem
+global host_ip
+global op_system
 
 ########################
 ##  Helper functions  ##
 ########################
 
-def mdUnix(name):
-    if os.system("mkdir " + name) != 0:
+def unix_mkdir(name):
+    """Makes a directory on a unix system"""
+    if os.system('mkdir ' + name) != 0:
         return DIR_FAILURE
     else:
         return 0
 
-def install(scriptName, homedir):
-    print "Initializing new user"
+def install(script_name, homedir):
+    """Installs the project"""
+    print 'Initializing new user'
 
     # Let's make sure everyone knows for sure that this is being installed
-    installMessage = """
+    print """
     Do you grant piMessage permission to install on your computer?
 
     PiMessage will have access to:
@@ -76,354 +74,346 @@ def install(scriptName, homedir):
     - your preferred text editor
 
     """
-    print installMessage
-    decision = raw_input("Do you want to install PiMessage? (y/n): ")
-    if decision != "y":
-        print "Not installing. Terminating PiMessage."
+
+    decision = raw_input('Do you want to install PiMessage? (y/n): ')
+    if decision != 'y':
+        print 'Not installing. Terminating PiMessage.'
         exit(1)
 
     # make the directory
-    if os.system("test -d " + homedir) != 0:
-        if mdUnix(homedir) == DIR_FAILURE:
+    if os.system('test -d ' + homedir) != 0:
+        if unix_mkdir(homedir) == DIR_FAILURE:
             exit(DIR_FAILURE)
 
     # generate user's keys
     # todo
 
 
-    if os.system("which vim >/dev/null 2>&1") == 0:
-        myEdit = "vim"
+    if os.system('which vim >/dev/null 2>&1') == 0:
+        my_editor = 'vim'
     else:
-        myEdit = "nano"
+        my_editor = 'nano'
 
     os.system('clear')
     for k in [0, 1, 2, 3]:
         if k == 3:
-            print "Error: too many tries for editor."
+            print 'Error: too many tries for editor.'
             exit(1)
         # Get user input
-        resp = raw_input("\nWhat is your preferred text editor? Press enter to default to "+myEdit+", enter 'cancel' to cancel the installation. ")
-        if resp == "cancel" or resp == "'cancel'":
+        prompt = '\nWhat is your preferred text editor? Press enter to '
+        prompt += 'default to '+my_editor+", enter 'cancel' to cancel the "
+        prompt += 'installation. '
+        resp = raw_input(prompt)
+        if resp == 'cancel' or resp == "'cancel'":
             # cancel the installation now
             exit(1)
-        elif resp == "":
-            print "Selecting", myEdit
+        elif not resp:
+            print 'Selecting', my_editor
             break
         else:
             # check if their editor is a valid command
-            val = os.system("which "+resp+" >/dev/null 2>&1")
-            if val == 0:
-                myEdit = resp
+            if os.system('which '+resp+' >/dev/null 2>&1') == 0:
+                my_editor = resp
                 break
             else:
-                print resp, "is not a recognized command."
+                print resp, 'is not a recognized command.'
 
     # write info to files
-    f = open(homedir+"editor", 'w')
-    f.write(myEdit) # doesn't terminate in newline
-    f.close()
+    with open(homedir+'editor', 'w') as fname:
+        fname.write(my_editor) # doesn't terminate in newline
 
-    if os.system("test -d " + homedir + "conversations") != 0:
-        if mdUnix(homedir + "conversations") == DIR_FAILURE:
+    if os.system('test -d ' + homedir + 'conversations') != 0:
+        if unix_mkdir(homedir + 'conversations') == DIR_FAILURE:
             exit(DIR_FAILURE)
         else:
             # create permissions
-            os.system("chmod 700 " + homedir + "conversations")
+            os.system('chmod 700 ' + homedir + 'conversations')
 
 
-    f = open(homedir+"contacts", 'w')
-    f.write("") # doesn't terminate in newline
-    f.close()
-    dirPath = os.path.abspath(os.path.dirname(sys.argv[0]) )
-    scriptName = dirPath+"/pimessage.py"
+    with open(homedir+'contacts', 'w') as fname:
+        fname.write('') # doesn't terminate in newline
+
+    dir_path = os.path.abspath(os.path.dirname(sys.argv[0]))
+    script_name = dir_path+'/pimessage.py'
 
     # alias `pimessage' to point to this script
-    _bashrc = os.path.join(utils.getHomeDir(), ".bashrc")
-    grepAlias = ["grep", "^alias \+pimessage="+scriptName, _bashrc]
-    grepResults = subprocess.Popen(grepAlias, stdout=subprocess.PIPE).communicate()[0]
-    if grepResults == "":
+    _bashrc = os.path.join(utils.get_home_dir(), '.bashrc')
+
+    grep_results = subprocess.Popen(['grep', '^alias \\+pimessage='+script_name,
+                                     _bashrc],
+                                    stdout=subprocess.PIPE).communicate()[0]
+    if grep_results == '':
         # must append alias command
         try:
-            f = open(_bashrc, 'a')
-            f.write("\n# For PiMessage -- do not delete\n")
-            f.write("alias pimessage="+scriptName+"\n")
-            f.close()
+            with open(_bashrc, 'a') as fname:
+                fname.write('\n# For PiMessage -- do not delete\n')
+                fname.write('alias pimessage='+script_name+'\n')
         except:
-            print "Error applying shell alias for pimessage"
+            print 'Error applying shell alias for pimessage'
 
     # start pmdaemon at startup
-    _profile = os.path.join(utils.getHomeDir(), ".profile")
-    grepDaemon = ["grep", "^"+dirPath+"/pmdaemon.py", _profile]
-    grepResults = subprocess.Popen(grepDaemon, stdout=subprocess.PIPE).communicate()[0]
-    if grepResults == "":
+    _profile = os.path.join(utils.get_home_dir(), '.profile')
+    grep_daemon_cmd = ['grep', '^'+dir_path+'/pmdaemon.py', _profile]
+    grep_results = subprocess.Popen(grep_daemon_cmd,
+                                    stdout=subprocess.PIPE).communicate()[0]
+    if not grep_results:
         # must append alias command
-        startDaemonCmd = dirPath+"/pmdaemon.py &"
-        flagCmd = dirPath+"/pmdaemon.py -f"
+        start_daemon_cmd = dir_path+'/pmdaemon.py &'
+        flag_cmd = dir_path+'/pmdaemon.py -f'
         try:
-            f = open(_profile, 'a')
-            f.write('\n'.join(["#start pimessage daemon",startDaemonCmd,flagCmd,'']) )
-            f.close()
+            with open(_profile, 'a') as fname:
+                fname.write('\n'.join(['#start pimessage daemon',
+                                       start_daemon_cmd, flag_cmd, '']))
         except:
-            print "Error loading PiMessage daemon in .profile"
+            print 'Error loading PiMessage daemon in .profile'
 
         # start the daemon manually this time
-        os.system(startDaemonCmd)
+        os.system(start_daemon_cmd)
 
-
-
-
-    print "PiMessage has been successfully installed."
+    print 'PiMessage has been successfully installed.'
     exit(0)
 
 
 def uninstall():
-    status = os.system('rm -r -f '+dataDir)
+    """Uninstaller for pimessage"""
+    status = os.system('rm -r -f '+data_dir)
 
     if status != 0:
-        print "Error in removing ~/.pimessage"
+        print 'Error in removing ~/.pimessage'
 
     # Remove daemon from .profile
     try:
-        _profile = os.path.join(utils.getHomeDir(), ".profile")
-        f = open(_profile, 'r')
-        buf = f.read()
-        f.close()
+        _profile = os.path.join(utils.get_home_dir(), '.profile')
+        with open(_profile, 'r') as fname:
+            buf = fname.read()
 
         # process buffer
         lines = buf.split('\n')
-        dirPath = os.path.abspath(os.path.dirname(sys.argv[0]) )
-        daemonL0 = "#start pimessage daemon"
-        daemonL1 = dirPath+"/pmdaemon.py &"
-        daemonL2 = dirPath+"/pmdaemon.py -f"
+        dir_path = os.path.abspath(os.path.dirname(sys.argv[0]))
+        daemon_line0 = '#start pimessage daemon'
+        daemon_line1 = dir_path+'/pmdaemon.py &'
+        daemon_line2 = dir_path+'/pmdaemon.py -f'
 
-        newLines = []
-        for l in lines:
-            if l != daemonL0 and l != daemonL1 and l != daemonL2:
-                newLines.append(l)
+        lines_to_append = []
+        for line in lines:
+            if (line != daemon_line0 and line != daemon_line1 and
+                    line != daemon_line2):
+                lines_to_append.append(line)
 
-        buf = '\n'.join(newLines)
+        buf = '\n'.join(lines_to_append)
 
-        f = open(_profile, 'w')
-        f.write(buf)
-        f.close()
+        with open(_profile, 'w') as fname:
+            fname.write(buf)
 
-    except Exception as e:
-        print "Error in handling ~/.profile"
-        print "%s" % str(e)
+    except Exception as err:
+        print 'Error in handling ~/.profile'
+        print '%s' % str(err)
         status = 1
 
     # Remove pimessage alias from .bashrc
     try:
-        _bashrc = os.path.join(utils.getHomeDir(), ".bashrc")
-        f = open(_bashrc, 'r')
-        buf = f.read()
-        f.close()
+        _bashrc = os.path.join(utils.get_home_dir(), '.bashrc')
+        with open(_bashrc, 'r') as fname:
+            buf = fname.read()
 
         # process buffer
         lines = buf.split('\n')
-        aliasL0 = "# For PiMessage -- do not delete"
-        aliasL1 = "alias pimessage="+dirPath+"/pimessage.py"
+        alias_line0 = '# For PiMessage -- do not delete'
+        alias_line1 = 'alias pimessage='+dir_path+'/pimessage.py'
 
-        newLines = []
-        for l in lines:
-            if l != aliasL0 and l != aliasL1:
-                newLines.append(l)
+        lines_to_append = []
+        for line in lines:
+            if line != alias_line0 and line != alias_line1:
+                lines_to_append.append(line)
 
-        buf = '\n'.join(newLines)
+        buf = '\n'.join(lines_to_append)
 
-        f = open(_bashrc, 'w')
-        f.write(buf)
-        f.close()
+        with open(_bashrc, 'w') as fname:
+            fname.write(buf)
 
-    except Exception as e:
-        print "Error in handling ~/.bashrc"
-        print "%s" % str(e)
+    except Exception as err:
+        print 'Error in handling ~/.bashrc'
+        print '%s' % str(err)
         status = 1
 
 
     if status != 0:
-        print "Error removing PiMessage."
+        print 'Error removing PiMessage.'
     else:
-        print "PiMessage has been successfully uninstalled."
+        print 'PiMessage has been successfully uninstalled.'
     return status
 
 
-def grabOpt(argv, n):
-    # returns the nth arg or returns NULL_ARGUMENT
-    if len(argv) <= n:
+def grab_opt(argv, num):
+    """returns the nth arg or returns NULL_ARGUMENT"""
+    if len(argv) <= num:
         return NULL_ARGUMENT
     else:
-        return argv[n]
+        return argv[num]
 
-def parseOpts(argv, editCmd):
-    scriptName = argv[0]
-    secOpt = grabOpt(argv, 2)
-    primOpt = grabOpt(argv, 1)
+def parse_opts(argv, edit_cmd):
+    """Parse all options and figure out what to do"""
+    script_name = argv[0]
+    opt2 = grab_opt(argv, 2)
+    opt1 = grab_opt(argv, 1)
 
-    if primOpt == NULL_ARGUMENT:
+    if opt1 == NULL_ARGUMENT:
         # only contains the script name, no arguments
         # call usage function
-        usage(scriptName)
+        usage(script_name)
         exit(1)
 
 
-    if primOpt == "-h" or primOpt == "--help" or primOpt == "help":
-        usage(scriptName)
+    if opt1 == '-h' or opt1 == '--help' or opt1 == 'help':
+        usage(script_name)
         exit(0)
-    elif primOpt == "ip": # show host IP address
-        print hostIp # a global value
-    elif primOpt == "logo":
+    elif opt1 == 'ip': # show host IP address
+        print host_ip # a global value
+    elif opt1 == 'logo':
         # This is a secret option to display the Raspberry Pi ASCII logo
-        showLogo()
+        show_logo()
         exit(0)
-    elif primOpt == "kill":
+    elif opt1 == 'kill':
         # This is a secret option to kill the daemon
-        status = killDaemon()
-        exit(status)
-    elif primOpt == "uninstall":
+        exit(kill_daemon())
+    elif opt1 == 'uninstall':
         # This is a secret option to completely remove PiMessage
         status = uninstall()
         exit(status)
 
-    elif primOpt == "history" or primOpt == "recent":
+    elif opt1 == 'history' or opt1 == 'recent':
         # show recent chat history
-        val = ""
-        if secOpt == "-a":
-            val = showRecents(True)
+        exit(show_recents((opt2 == '-a')))
+    elif opt1 == 'new' or opt1 == 'compose': # compose a message
+        if opt2 == NULL_ARGUMENT:
+            print 'Invalid number of operands for %s option' % opt1
+            usage(script_name)
+            exit(1)
+
+        opt3 = grab_opt(argv, 3)
+        opt4 = grab_opt(argv, 4)
+
+        if opt3 == '-m' and opt4 != NULL_ARGUMENT:
+            send_message(opt2, edit_cmd, opt4)
         else:
-            val = showRecents(False)
-        exit(val)
-    elif primOpt == "new" or primOpt == "compose": # compose a message
-        if secOpt == NULL_ARGUMENT:
-            print "Invalid number of operands for %s option" % primOpt
-            usage(scriptName)
+            send_message(opt2, edit_cmd)
+
+    elif opt1 == 'read': # read a conversation
+        if opt2 == NULL_ARGUMENT:
+            print 'Invalid number of operands for %s option' % opt1
+            usage(script_name)
             exit(1)
-
-        thirdOpt = grabOpt(argv, 3)
-        fourthOpt = grabOpt(argv, 4)
-
-        if thirdOpt == "-m" and fourthOpt != NULL_ARGUMENT:
-            sendMessage(secOpt, editCmd, fourthOpt)
-        else:
-            sendMessage(secOpt, editCmd)
-
-    elif primOpt == "read": # read a conversation
-        if secOpt == NULL_ARGUMENT:
-            print "Invalid number of operands for %s option" % primOpt
-            usage(scriptName)
-            exit(1)
-        val = readConvo(secOpt)
+        val = read_convo(opt2)
         exit(val)
 
-    elif primOpt == "rm-convo": # delete a conversation
-        if secOpt == NULL_ARGUMENT:
-            print "Invalid number of operands for %s option" % primOpt
-            usage(scriptName)
+    elif opt1 == 'rm-convo': # delete a conversation
+        if opt2 == NULL_ARGUMENT:
+            print 'Invalid number of operands for %s option' % opt1
+            usage(script_name)
             exit(1)
 
-        val = rmConvo(secOpt)
+        val = rm_convo(opt2)
         exit(val)
 
-    elif primOpt == "resend": # resend a failed message
-        if secOpt == NULL_ARGUMENT:
-            print "Invalid number of operands for %s option" % primOpt
-            usage(scriptName)
+    elif opt1 == 'resend': # resend a failed message
+        if opt2 == NULL_ARGUMENT:
+            print 'Invalid number of operands for %s option' % opt1
+            usage(script_name)
             exit(1)
 
-        sendMessage(secOpt, editCmd, "", False)
+        send_message(opt2, edit_cmd, '', False)
 
 
-    elif primOpt == "contacts":
+    elif opt1 == 'contacts':
         # contacts of the form:
         # Adam Smith\t1.2.3.4
         # Betty Rogers\t98.76.54.321
-        s = secOpt
-        t = grabOpt(argv, 3)
+        sock = opt2
+        opt3 = grab_opt(argv, 3)
 
         # Display the contact list in less
-        if (s == "-a" and t == "-o") or (s == "-o" and t == "-a"):
+        if (sock == '-a' and opt3 == '-o') or (sock == '-o' and opt3 == '-a'):
             # stdout, show IP addresses
-            os.system("cat "+dataDir+"contacts")
-        elif s == "-a" and t != "-o":
+            os.system('cat '+data_dir+'contacts')
+        elif sock == '-a' and opt3 != '-o':
             # display in less, show IP addresses
-            os.system("less "+dataDir+"contacts")
-        elif s == "-o" and t != "-o":
+            os.system('less '+data_dir+'contacts')
+        elif sock == '-o' and opt3 != '-o':
             # stdout, no IP addresses
-            os.system("sed 's/\t.*$//' " + dataDir+"contacts")
+            os.system("sed 's/\t.*$//' " + data_dir+'contacts')
         else:
             # display in less, no IP addresses
-            os.system("sed 's/\t.*$//' " + dataDir+"contacts | less")
+            os.system("sed 's/\t.*$//' " + data_dir+'contacts | less')
 
         exit(0)
 
 
-    elif primOpt == "add":
-        thirdOpt = grabOpt(argv, 3)
+    elif opt1 == 'add':
+        opt3 = grab_opt(argv, 3)
 
-        if thirdOpt == NULL_ARGUMENT:
-            print "Invalid number of operands for %s option" % primOpt
-            usage(scriptName)
+        if opt3 == NULL_ARGUMENT:
+            print 'Invalid number of operands for %s option' % opt1
+            usage(script_name)
             exit(1)
 
         # default is to NOT overwrite (prompt user if they want to change)
-        addContact(secOpt, thirdOpt, "n")
+        add_contact(opt2, opt3, 'n')
 
-
-    elif primOpt == "force-link":
+    elif opt1 == 'force-link':
         # force-link a contact to an IP
         # essentially, just overwrite a contact's IP
 
-        thirdOpt = grabOpt(argv, 3)
+        opt3 = grab_opt(argv, 3)
 
-        if thirdOpt == NULL_ARGUMENT:
-            print "Invalid number of operands for %s option" % primOpt
-            usage(scriptName)
+        if opt3 == NULL_ARGUMENT:
+            print 'Invalid number of operands for %s option' % opt1
+            usage(script_name)
             exit(1)
 
         # default is to overwrite old contact
-        addContact(secOpt, thirdOpt, "y")
+        add_contact(opt2, opt3, 'y')
 
-
-    elif primOpt == "rm-contact":
-        if secOpt == NULL_ARGUMENT:
-            print "Invalid number of operands for %s option" % primOpt
-            usage(scriptName)
+    elif opt1 == 'rm-contact':
+        if opt2 == NULL_ARGUMENT:
+            print 'Invalid number of operands for %s option' % opt1
+            usage(script_name)
             exit(1)
 
-        ret = rmContact(secOpt)
+        ret = rm_contact(opt2)
         if ret != 0:
-            print "Error in removing your contact."
+            print 'Error in removing your contact.'
             exit(ret)
 
-        resp = raw_input("Would you also like to delete conversation history for this contact? (y/n) ")
-        if resp == "y" or resp == "yes" or resp == "Y":
-            print "deleting conversation for", secOpt
-            ret = rmConvo(secOpt)
+        resp = raw_input('Would you also like to delete conversation history '
+                         'for this contact? (y/n) ')
+        if resp == 'y' or resp == 'yes' or resp == 'Y':
+            print 'deleting conversation for', opt2
+            ret = rm_convo(opt2)
 
         exit(ret)
 
-    elif primOpt == "config":
-        thirdOpt = grabOpt(argv, 3)
-        if thirdOpt == NULL_ARGUMENT:
-            print "Invalid number of operands for %s option" % primOpt
-            usage(scriptName)
+    elif opt1 == 'config':
+        opt3 = grab_opt(argv, 3)
+        if opt3 == NULL_ARGUMENT:
+            print 'Invalid number of operands for %s option' % opt1
+            usage(script_name)
             exit(1)
 
-        if secOpt == "editor":
-            if os.system("which "+thirdOpt+" >/dev/null 2>&1") == 0:
-                with open(dataDir+"editor", 'w') as f:
-                    f.write(thirdOpt)
+        if opt2 == 'editor':
+            if os.system('which '+opt3+' >/dev/null 2>&1') == 0:
+                with open(data_dir+'editor', 'w') as fname:
+                    fname.write(opt3)
             else:
-                print "Error: %s is not a recognized command." % thirdOpt
+                print 'Error: %s is not a recognized command.' % opt3
 
         else:
-            print "Unknown variable. Cannot config."
+            print 'Unknown variable. Cannot config.'
             exit(1)
 
     else:
         # some invalid option
-        print "Invalid option %s" % primOpt
-        usage(scriptName)
+        print 'Invalid option %s' % opt1
+        usage(script_name)
         exit(1)
 
 
@@ -432,20 +422,22 @@ def parseOpts(argv, editCmd):
 ##  Option functions  ##
 ########################
 
-def usage(scriptName):
-    # Prints usage/help information
-    # This is called by --help, -h, or invalid usage
+def usage(script_name):
+    """
+    Prints usage/help information
+    This is called by --help, -h, or invalid usage
+    """
 
     # print usage info
-    print "Usage: %s [options] [option arguments]\n" % scriptName
+    print 'Usage: %s [options] [option arguments]\n' % script_name
 
     # print help/option info
     # Don't indent on docstring
-    optionMsg = """Options:
+    print """Options:
 help, -h, --help                           help
 ip                                         show host IP address
 history, recent        [-a]                show recent chat history
-compose, new           CONTACT [-m "msg"]  compose & send message
+compose, new           CONTACT [-m 'msg']  compose & send message
 read                   CONTACT             read a conversation
 rm-convo               CONTACT             delete a conversation
 resend                 CONTACT             resend a failed message
@@ -457,73 +449,70 @@ rm-contact             CONTACT             delete a contact
 
 """
 
-    print(optionMsg)
-
     return # exit after calling this function
 
 
-def addContact(name, ip, overwrite):
-    # Search for if this person is already there
-    myFile = open(dataDir+"contacts", "r")
-    allContacts = myFile.read()
-    myFile.close()
-    contactIndex = allContacts.find(name+"\t")
-    if contactIndex != -1:
-        if overwrite != "y":
-            print "%s is already entered in your contact list." % name
-            overwrite = raw_input("Would you like to overwrite this entry? (y/n) ")
-        if overwrite != "y":
-            print "Not overwriting the entry. Terminating."
+def add_contact(name, ip_addr, overwrite):
+    """Search for if this person is already there"""
+    with open(data_dir+'contacts', 'r') as fname:
+        all_contacts = fname.read()
+    contact_idx = all_contacts.find(name+'\t')
+    if contact_idx != -1:
+        if overwrite != 'y':
+            print '%s is already entered in your contact list.' % name
+            overwrite = raw_input('Would you like to overwrite this entry? '
+                                  '(y/n) ')
+        if overwrite != 'y':
+            print 'Not overwriting the entry. Terminating.'
             exit(1)
         else:
             # remove the old one
-            rmContact(name)
-            print "Your contact has been updated."
+            rm_contact(name)
+            print 'Your contact has been updated.'
 
 
     # add contact normally
-    myFile = open(dataDir+"contacts", "a")
-    addString = name+"\t"+ip+"\n"
-    myFile.write(addString)
-    myFile.close()
+    add_string = name+'\t'+ip_addr+'\n'
+    with open(data_dir+'contacts', 'a') as fname:
+        fname.write(add_string)
 
     # use GNU sort
-    sortCmd = "sort -f "+dataDir+"contacts > "+dataDir+"sort_contacts"
-    os.system(sortCmd)
+    sort_cmd = 'sort -f '+data_dir+'contacts > '+data_dir+'sort_contacts'
+    os.system(sort_cmd)
 
     # overwrite old file
-    os.system("mv "+dataDir+"sort_contacts "+dataDir+"contacts")
+    os.system('mv '+data_dir+'sort_contacts '+data_dir+'contacts')
 
     return 0
 
-def rmContact(name):
-    myFile = open(dataDir+"contacts", "r")
-    allContacts = myFile.read()
-    myFile.close()
+def rm_contact(name):
+    """Delete someone from your contacts"""
+    with open(data_dir+'contacts', 'r') as fname:
+        all_contacts = fname.read()
 
     # this is the part up until that contact
-    contactIndex = allContacts.find(name+"\t")
-    if contactIndex == -1:
+    contact_idx = all_contacts.find(name+'\t')
+    if contact_idx == -1:
         # contact isn't in here
         return 1
 
-    firstHalf = allContacts[0:contactIndex]
+    first_half = all_contacts[0:contact_idx]
 
     # this is the part right after that contact until the end
-    secondHalf = ip.stringSlice(allContacts, name)
-    secondHalf = ip.stringSlice(secondHalf, '\n')
-    secondHalf = secondHalf[1:]
-    allContacts = firstHalf + secondHalf
+    second_half = ip.string_slice(all_contacts, name)
+    second_half = ip.string_slice(second_half, '\n')
+    second_half = second_half[1:]
+    all_contacts = first_half + second_half
 
-    myFile = open(dataDir+"contacts", "w")
-    myFile.write(allContacts) # add the new entry later
-    myFile.close()
+    with open(data_dir+'contacts', 'w') as fname:
+        fname.write(all_contacts) # add the new entry later
 
     return 0
 
 
-def showLogo():
-    msg = """
+def show_logo():
+    """Shows the logo"""
+    print r"""
                                    PiMessage
                                    ---------
 
@@ -539,193 +528,198 @@ def showLogo():
                                       '~'
 
 """
-    print msg
     return
 
-def killDaemon():
-    # This will kill the PiMessage daemon
-    # Note: this is NOT recommended for normal use
+def kill_daemon():
+    """
+    This will kill the PiMessage daemon
+    Note: this is NOT recommended for normal use
+    """
+    return os.system(os.path.dirname(sys.argv[0]) + '/killDaemon')
 
-    dirPath = os.path.dirname(sys.argv[0])
-    runScript = dirPath + "/killDaemon"
-    return os.system(runScript)
-
-
-
-def showRecents(isAll):
-    # This shows the 10 most recent conversations & the top message in each
-    # one by default. This has the option to show all recent conversations
-    # in a similar fashion if `isAll' is True.
+def show_recents(is_all):
+    """
+    This shows the 10 most recent conversations & the top message in each
+    one by default. This has the option to show all recent conversations in
+    a similar fashion if `is_all' is True.
+    """
 
     # Build the list of recent conversations
-    getConvoCmd = "ls -t "+dataDir+"conversations/"
-    sortedConvos = subprocess.Popen(getConvoCmd.split(), stdout=subprocess.PIPE).communicate()[0]
+    get_convo_cmd = 'ls -t '+data_dir+'conversations/'
+    sorted_convos = subprocess.Popen(get_convo_cmd.split(),
+                                     stdout=subprocess.PIPE).communicate()[0]
 
-    convoList = sortedConvos.split('\n')
+    convo_list = sorted_convos.split('\n')
 
-    if not isAll:
-        convoList = convoList[0:9]
+    if not is_all:
+        convo_list = convo_list[0:9]
 
-    for k in convoList:
+    for k in convo_list:
         # remove .conv from each conversation
         vals = k.split('.')
         if len(vals) == 2:
             k = vals[0]
         else:
-            k = ".".join(vals[0:len(vals)-1] )
+            k = '.'.join(vals[0:len(vals)-1])
 
         print k
 
     return
 
-def readConvo(myContact):
-    # Read the saved conversation with this contact if one exists
-    # Display a message to indicate if no conversation exists
+def read_convo(my_contact):
+    """
+    Read the saved conversation with this contact if one exists
+    Display a message to indicate if no conversation exists
+    """
 
-    convFile = dataDir+"conversations/"+myContact+".conv"
+    conv_file = data_dir+'conversations/'+my_contact+'.conv'
 
     try:
         # If file can't be read, than we should return immediately
-        f = open(convFile, 'r')
-        f.close()
+        fname = open(conv_file, 'r')
+        fname.close()
     except:
-        print "It appears that you don't currently have a conversation with", myContact
+        print("It appears that you don't currently have a conversation with",
+              my_contact)
         return 0
 
-    return os.system("less "+convFile)
+    return os.system('less '+conv_file)
 
-def rmConvo(myContact):
-    # Delete the conversation for this contact
-    # Display a message to indicate if no conversation exists
+def rm_convo(my_contact):
+    """
+    Delete the conversation for this contact
+    Display a message to indicate if no conversation exists
+    """
 
-    convFile = dataDir+"conversations/"+myContact+".conv"
+    conv_file = data_dir+'conversations/'+my_contact+'.conv'
 
     try:
         # If file can't be read, than we should return immediately
-        f = open(convFile, 'r')
-        f.close()
+        fname = open(conv_file, 'r')
+        fname.close()
     except:
-        print "No conversation for", myContact, "could be found."
+        print 'No conversation for', my_contact, 'could be found.'
         return 1
 
-    return os.system("rm "+convFile)
+    return os.system('rm '+conv_file)
 
-def sendMessage(myContact, editor, text="", shouldCompose=True):
+def send_message(my_contact, editor, text='', should_compose=True):
+    """
+    Sends a message to 'my_contact'
+    Uses 'editor' to compose the message unless 'text' is not empty
+    """
+
     # fetch sender IP
-    #if hostIp == IP_FAILURE:
+    #if host_ip == IP_FAILURE:
     #    exit(1)
 
     # fetch recipient IP
 
-    recIp = ""
-    with open(dataDir+"contacts") as fp:
-        for line in fp:
+    with open(data_dir+'contacts') as fname:
+        for line in fname:
             rec = line.split('\t')
-            if rec[0] == myContact:
-                recIp = rec[1].rstrip('\n')
+            if rec[0] == my_contact:
+                rec_ip = rec[1].rstrip('\n')
                 break
 
     ## Compose the message
 
     # store this in conversations directory
-    fileName = dataDir+"conversations/msg"+myContact
+    file_name = data_dir+'conversations/msg'+my_contact
 
-    if shouldCompose:
-        if text == "":
-            ret = os.system(editor+" "+fileName)
-            if ret != 0:
-                print "Error in opening message file."
+    if should_compose:
+        if not text:
+            if os.system(editor+' '+file_name):
+                print 'Error in opening message file.'
                 exit(2)
         else:
             # use the short message typed by the user at the prompt
             try:
-                f = open(fileName, 'w')
-                f.write(text)
-                f.close()
+                with open(file_name, 'w') as fname:
+                    fname.write(text)
             except:
-                print "Error composing your file on disc."
+                print 'Error composing your file on disc.'
                 exit(1)
     else:
         # check to see if a saved message actually exists
         try:
-            f = open(fileName, 'r')
-            f.close()
+            with open(file_name, 'r') as fname:
+                pass
         except:
             # if we couldn't open the file, then we can't resend it
-            print "Unable to find a saved message for", myContact
+            print 'Unable to find a saved message for %s' % my_contact
             exit(1)
 
 
     # prompt if they want to send or not
-    #shouldSend = raw_input("To send or not to send; that is the question (y/n): ")
+    should_send = raw_input('To send or not to send; that is the question '
+                            '(y/n): ')
 
-    #ss = shouldSend
-    #if ss != "y" and ss != "Y" and ss != "yes" and ss != "Yes" and ss != "YES":
-    #    print "Your message has been saved for next time you compose a message to %s" % myContact
-    #    exit(5)
+    if (should_send != 'y' and should_send != 'Y' and should_send != 'yes' and
+            should_send != 'Yes' and should_send != 'YES'):
+        print('Your message has been saved for next time you compose a message '
+              'to %s' % my_contact)
+        exit(5)
 
     # get time stamp in proper format
-    sendTime = str(time.time())
+    send_time = str(time.time())
 
     # format the message with the meta data
-    msgLines = []
+    msg_lines = [rec_ip, host_ip, send_time, '']
 
-    msgLines.append(recIp)
-    msgLines.append(hostIp)
-    msgLines.append(sendTime) # guaranteed two consecutive newlines
-    msgLines.append("")
+    # msg_lines.append(rec_ip)
+    # msg_lines.append(host_ip)
+    # msg_lines.append(send_time) # guaranteed two consecutive newlines
+    # msg_lines.append('')
 
-    with open(fileName) as fp:
-        for line in fp:
-           msgLines.append(line.rstrip('\n') )
-    msgLines.append("")
+    with open(file_name) as fname:
+        for line in fname:
+            msg_lines.append(line.rstrip('\n'))
+    msg_lines.append('')
 
-    msgString = "\n".join(msgLines)
+    msg_text = '\n'.join(msg_lines)
 
     # Send the full message
 
-    if hostIp != IP_FAILURE:
-        s = socket.socket()
-        host = socket.gethostname()
-        port = ip.PORT_NUM
+    if host_ip != IP_FAILURE:
+        sock = socket.socket()
+        # host = socket.gethostname()
         try:
-            s.connect((recIp, port))
+            sock.connect((rec_ip, ip.PORT_NUM))
         except:
-            print "Error: Unable to send message. Perhaps you have an incorrect IP address?"
+            print('Error: Unable to send message. Perhaps you have an '
+                  'incorrect IP address?')
             exit(4)
 
         try:
-            s.sendall(msgString)
+            sock.sendall(msg_text)
 
             amount_received = 0
-            amount_expected = len(msgString)
+            amount_expected = len(msg_text)
             packets = []
 
             while amount_received < amount_expected:
-                data = s.recv(16)
+                data = sock.recv(16)
                 amount_received += len(data)
                 packets.append(data)
 
         finally:
-            s.close()   # Close the socket when done
-            recvMsg = "".join(packets)
+            sock.close()   # Close the socket when done
+            recv_msg = ''.join(packets)
 
-            if msgString != recvMsg:
-                print "There may be an error with the data sent"
+            if msg_text != recv_msg:
+                print 'There may be an error with the data sent'
 
         # add the message to conversation history
-        ret = utils.saveMessage(msgString, "send")
-        if ret == utils.TUPLE_FAIL:
-            print "failure in saving your message."
-
+        if utils.save_msg(msg_text, 'send') == utils.TUPLE_FAIL:
+            print 'failure in saving your message.'
 
         # clean up by removing old message to contact
-        ret = os.system("rm "+fileName)
-        if ret != 0:
-            print "Error in removing message file."
+        if os.system('rm '+file_name):
+            print 'Error in removing message file.'
             exit(2)
     else:
-        print "Please connect to a network to send your message."
+        print 'Please connect to a network to send your message.'
 
 
     return 0
@@ -735,85 +729,75 @@ def sendMessage(myContact, editor, text="", shouldCompose=True):
 ########################
 
 def main(argv):
+    """Main function"""
 
     ## Get user information ##
-    global operatingSystem
-    operatingSystem = os.name
-    if operatingSystem != "nt":
-        operatingSystem = subprocess.Popen(['uname', '-s'], stdout=subprocess.PIPE).communicate()[0]
-        operatingSystem = operatingSystem.rstrip('\n')
+    global op_system
+    op_system = os.name
+    if op_system != 'nt':
+        op_system = subprocess.Popen(['uname', '-s'],
+                                     stdout=subprocess.PIPE).communicate()[0]
+        op_system = op_system.rstrip('\n')
         # change Cygwin to say 'CYGWIN' always
-        underScoreIndex = operatingSystem.find("_")
-        if underScoreIndex != -1:
-            operatingSystem = operatingSystem[:underScoreIndex]
+        under_score_idx = op_system.find('_')
+        if under_score_idx != -1:
+            op_system = op_system[:under_score_idx]
 
-    if operatingSystem != "Linux" and operatingSystem != "Darwin": # and operatingSystem != "CYGWIN":
-        print "Error: %s is not a supported operating system at this time." % operatingSystem
+    if op_system != 'Linux' and op_system != 'Darwin':
+        print('Error: %s is not a supported operating system at this time.'
+              % op_system)
         exit(5)
 
+    global data_dir
+    data_dir = os.path.join(utils.get_home_dir(), '.pimessage/')
 
-    global dataDir
-    dataDir = os.path.join(utils.getHomeDir(), ".pimessage/")
+    opt1 = grab_opt(argv, 1)
+    if opt1 == 'uninstall':
+        exit(uninstall())
 
-    firstOpt = grabOpt(argv, 1)
-    if firstOpt == "uninstall":
-        exit(uninstall() )
+    script_name = argv[0]
+    dir_exists_cmd = 'test -d ' + data_dir
+    if os.system(dir_exists_cmd) != 0:
+        install(script_name, data_dir)
 
-
-    scriptName = argv[0]
-    dirExistsCommand = "test -d " + dataDir
-    if os.system(dirExistsCommand) != 0:
-        install(scriptName, dataDir)
-
-    dirFiles = subprocess.Popen(['ls', '-A', dataDir], stdout=subprocess.PIPE).communicate()[0]
+    dir_files = subprocess.Popen(['ls', '-A', data_dir],
+                                 stdout=subprocess.PIPE).communicate()[0]
 
     # must be in correct ls -A order
-    CORRECT_DIR_FILES = """contacts
+    correct_dir_files = """contacts
 conversations
 daemonError.log
 editor
 """
 
-    ALT_DIR_FILES = """contacts
+    alt_dir_files = """contacts
 conversations
 editor
 """
 
-    if dirFiles != CORRECT_DIR_FILES and dirFiles != ALT_DIR_FILES:
-        install(scriptName,  dataDir)
+    if dir_files != correct_dir_files and dir_files != alt_dir_files:
+        install(script_name, data_dir)
 
     # get user's chosen editor
-    editCommand = open(dataDir+"editor", 'r').read().rstrip('\n')
-    if subprocess.Popen(['which', editCommand], stdout=subprocess.PIPE).communicate()[0] == "":
-        print "Error: %s is not a valid editor. Please adjust your editor value" % editCommand
+    edit_cmd = open(data_dir+'editor', 'r').read().rstrip('\n')
+    if not subprocess.Popen(['which', edit_cmd],
+                            stdout=subprocess.PIPE).communicate()[0]:
+        print('Error: %s is not a valid editor. Please adjust your editor '
+              'value' % edit_cmd)
         exit(2)
 
-    global hostIp
-    hostIp = ip.getHostIp()
-    #if hostIp == IP_FAILURE:
-    #    print "Error: your IP address could not be correctly retrieved."
+    global host_ip
+    host_ip = ip.get_host_ip()
+    #if host_ip == IP_FAILURE:
+    #    print 'Error: your IP address could not be correctly retrieved.'
     #    exit(2)
-
-
-    ## User must already have information entered
-
 
     ## Option parsing ##
     # figure out which option was called
-    parseOpts(argv, editCommand)
-
-
-
-
-
-
-
-
-
+    parse_opts(argv, edit_cmd)
     return 0
 
 
-
-if __name__ == "__main__":
-    status = main(sys.argv)
-    exit(status)
+if __name__ == '__main__':
+    STATUS = main(sys.argv)
+    exit(STATUS)

@@ -1,15 +1,5 @@
 #!/usr/bin/python
 
-import socket
-import sys
-
-import ip # local file
-import utils
-import datetime
-import time
-import os
-import subprocess
-
 """
 This is the PiMessage daemon. This acts as a server running on every user's
 computer to receive PiMessages sent over LAN.
@@ -18,23 +8,34 @@ computer to receive PiMessages sent over LAN.
 
 """
 
-ERR_FILE = os.path.join(utils.getHomeDir(), ".pimessage", "daemonError.log")
-FLAG_FILE = os.path.join(utils.getHomeDir(), ".pimessage", "flag")
+import socket
+import sys
 
-def errLog(msg):
-    # log an error with its time followed by the message describing it
+import ip # local file
+import utils
+import datetime
+import time
+import os
+
+ERR_FILE = os.path.join(utils.get_home_dir(), '.pimessage', 'daemonError.log')
+FLAG_FILE = os.path.join(utils.get_home_dir(), '.pimessage', 'flag')
+
+def err_log(msg):
+    """log an error with its time followed by the message describing it"""
 
     now = datetime.datetime.now().time()
-    formattedStamp = now.strftime('%H:%M %m/%d/%Y')
-    errMsg = '\t'.join([formattedStamp, msg])
-    #print >>sys.stderr, errMsg
-    f = open(ERR_FILE, 'a')
-    f.write(errMsg+'\n')
-    f.close()
+    formatted_stamp = now.strftime('%H:%M %m/%d/%Y')
+    err_msg = '\t'.join([formatted_stamp, msg])
+    # print >>sys.stderr, err_msg
+    with open(ERR_FILE, 'a') as fname:
+        fname.write(err_msg+'\n')
 
-## Checks if the daemon is starting in detached mode
-## If not, this will immediately terminate so that the user can still login
-def checkStartup():
+def check_startup():
+    """
+    Checks if the daemon is starting in detached mode
+    If not, this will immediately terminate so that the user can still login
+    """
+
     # Wait 1 second for the program after this one to create a file
     time.sleep(0.5)
 
@@ -45,48 +46,51 @@ def checkStartup():
         return
     else:
         # This probably didn't start in daemon mode, so terminate
-        errLog("Daemon likely did not start correctly. Consider uninstalling")
+        err_log('Daemon likely did not start correctly. Consider uninstalling')
         exit(1)
 
-## This creates the flag file if the -f option is supplied.
-## This is NOT run in detached mode, so it must terminate IMMEDIATELY
-def markFlag():
+def mark_flag():
+    """
+    This creates the flag file if the -f option is supplied.
+    This is NOT run in detached mode, so it must terminate IMMEDIATELY
+    """
     if os.path.isfile(FLAG_FILE):
-        errLog("pmdaemon did not close properly last time")
-    f = open(FLAG_FILE, 'w')
-    f.write("pimessage\n")
-    f.close()
+        err_log('pmdaemon did not close properly last time')
+    with open(FLAG_FILE, 'w') as fname:
+        fname.write('pimessage\n')
     exit(0)
 
 if len(sys.argv) > 1:
-    if sys.argv[1] == "-f":
-        markFlag()
+    if sys.argv[1] == '-f':
+        mark_flag()
         exit(0) # just in case
 
-checkStartup()
+check_startup()
 
-#errLog("Starting pmdaemon") # DEBUG
+# err_log('Starting pmdaemon') # DEBUG
 
 # fetch IP address of machine
-serverIp = ip.getHostIp()
+SERVER_IP = ip.get_host_ip()
 k = 0
-while serverIp == ip.IP_FAILURE and k < 360:
+while SERVER_IP == ip.IP_FAILURE and k < 360:
     time.sleep(5)
-    serverIp = ip.getHostIp()
+    SERVER_IP = ip.get_host_ip()
     k = k + 1
 
 if k >= 360:
-    errLog("Error: PiMessage Daemon timed out. Unable to start. IP address could not be found")
+    err_log('Error: PiMessage Daemon timed out. Unable to start. IP address '
+            'could not be found')
     exit(1)
 
 sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
-server_address = (serverIp, ip.PORT_NUM)
+SERVER_ADDRESS = (SERVER_IP, ip.PORT_NUM)
 
 try:
-    sock.bind(server_address)
+    sock.bind(SERVER_ADDRESS)
 except:
-    errLog("Error: Unable to start PiMessage Daemon. Perhaps it's already running?")
+    err_log('Error: Unable to start PiMessage Daemon. '
+            "Perhaps it's already running?")
     exit(1)
 
 # listen for incoming connections
@@ -109,34 +113,20 @@ while True:
     finally:
         connection.close()
 
-        message = "".join(packets) # concatenate all packets together
+        MESSAGE = ''.join(packets) # concatenate all packets together
 
-        lines = message.split('\n')
+        lines = MESSAGE.split('\n')
 
-        # verify that this message is going to the correct IP
-        if lines[0] == serverIp: # don't accept otherwise
-            #print message
+        # verify that this MESSAGE is going to the correct IP
+        if lines[0] == SERVER_IP: # don't accept otherwise
+            #print MESSAGE
 
-            ret = utils.saveMessage(message, "rec")
-            if ret == utils.TUPLE_FAIL:
+            RET = utils.save_msg(MESSAGE, 'rec')
+            if RET == utils.TUPLE_FAIL:
                 # log the error
-                errLog("There was an error saving your message.")
+                err_log('There was an error saving your message.')
 
             # inform the user that they got a pimessage
             # todo
-
-
-
-        # then return to receive more messages
-
-
-
-
-
-
-
-
-
-
 
 exit(0)
