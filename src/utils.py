@@ -71,17 +71,15 @@ def save_msg(msg_str, mode):
 
     # write the newly received message to disc
     try:
-        fname = open(conv_file, 'a')
-        fname.write(contact+" wrote:\n")
-        for k in msg_data:
-            fname.write(k+'\n')
+        with open(conv_file, 'a') as fname:
+            fname.write(contact+" wrote:\n")
+            for k in msg_data:
+                fname.write(k+'\n')
 
-        value = datetime.datetime.fromtimestamp(time_stamp)
-        formatted_stamp = value.strftime('%m/%d/%Y %H:%M')
-        fname.write(formatted_stamp+'\n\n')
-
-        fname.close()
-    except Exception:
+            value = datetime.datetime.fromtimestamp(time_stamp)
+            formatted_stamp = value.strftime('%m/%d/%Y %H:%M')
+            fname.write(formatted_stamp+'\n\n')
+    except (TypeError, IOError):
         # some sort of error, so let's return failure state
         return TUPLE_FAIL
 

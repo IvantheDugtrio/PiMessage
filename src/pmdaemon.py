@@ -88,7 +88,7 @@ SERVER_ADDRESS = (SERVER_IP, ip.PORT_NUM)
 
 try:
     sock.bind(SERVER_ADDRESS)
-except:
+except socket.error:
     err_log('Error: Unable to start PiMessage Daemon. '
             "Perhaps it's already running?")
     exit(1)

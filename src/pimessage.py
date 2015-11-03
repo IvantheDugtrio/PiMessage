@@ -148,7 +148,7 @@ def install(script_name, homedir):
             with open(_bashrc, 'a') as fname:
                 fname.write('\n# For PiMessage -- do not delete\n')
                 fname.write('alias pimessage='+script_name+'\n')
-        except:
+        except IOError:
             print 'Error applying shell alias for pimessage'
 
     # start pmdaemon at startup
@@ -164,7 +164,7 @@ def install(script_name, homedir):
             with open(_profile, 'a') as fname:
                 fname.write('\n'.join(['#start pimessage daemon',
                                        start_daemon_cmd, flag_cmd, '']))
-        except:
+        except IOError:
             print 'Error loading PiMessage daemon in .profile'
 
         # start the daemon manually this time
@@ -576,9 +576,9 @@ def read_convo(my_contact):
 
     try:
         # If file can't be read, than we should return immediately
-        fname = open(conv_file, 'r')
-        fname.close()
-    except:
+        with open(conv_file, 'r'):
+            pass
+    except IOError:
         print("It appears that you don't currently have a conversation with",
               my_contact)
         return 0
@@ -595,9 +595,9 @@ def rm_convo(my_contact):
 
     try:
         # If file can't be read, than we should return immediately
-        fname = open(conv_file, 'r')
-        fname.close()
-    except:
+        with open(conv_file, 'r'):
+            pass
+    except IOError:
         print 'No conversation for', my_contact, 'could be found.'
         return 1
 
@@ -637,15 +637,15 @@ def send_message(my_contact, editor, text='', should_compose=True):
             try:
                 with open(file_name, 'w') as fname:
                     fname.write(text)
-            except:
+            except IOError:
                 print 'Error composing your file on disc.'
                 exit(1)
     else:
         # check to see if a saved message actually exists
         try:
-            with open(file_name, 'r') as fname:
+            with open(file_name, 'r'):
                 pass
-        except:
+        except IOError:
             # if we couldn't open the file, then we can't resend it
             print 'Unable to find a saved message for %s' % my_contact
             exit(1)
@@ -686,7 +686,7 @@ def send_message(my_contact, editor, text='', should_compose=True):
         # host = socket.gethostname()
         try:
             sock.connect((rec_ip, ip.PORT_NUM))
-        except:
+        except socket.error:
             print('Error: Unable to send message. Perhaps you have an '
                   'incorrect IP address?')
             exit(4)
