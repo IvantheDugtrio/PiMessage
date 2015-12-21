@@ -82,8 +82,10 @@ def install(script_name, homedir):
         exit(1)
 
     # make the directory
-    if os.system('test -d ' + homedir) != 0:
-        if unix_mkdir(homedir) == DIR_FAILURE:
+    if not os.path.isdir(homedir):
+        try:
+            os.mkdir(homedir)
+        except OSError:
             exit(DIR_FAILURE)
 
     # generate user's keys
@@ -123,14 +125,11 @@ def install(script_name, homedir):
     with open(homedir+'editor', 'w') as fname:
         fname.write(my_editor) # doesn't terminate in newline
 
-    if os.system('test -d ' + homedir + 'conversations') != 0:
-        if unix_mkdir(homedir + 'conversations') == DIR_FAILURE:
+    if not os.path.isdir(homedir + 'conversations'):
+        try:
+            os.mkdir(homedir + 'conversations', 0700)
+        except OSError:
             exit(DIR_FAILURE)
-        else:
-            # create permissions
-            os.system('chmod 700 ' + homedir + 'conversations')
-
-
     with open(homedir+'contacts', 'w') as fname:
         fname.write('') # doesn't terminate in newline
 
@@ -177,11 +176,12 @@ def install(script_name, homedir):
 
 def uninstall():
     """Uninstaller for pimessage"""
-    # status = os.system('rm -r -f '+data_dir)
-    shutil.rmtree(data_dir, ignore_errors=True)
-
-    if status != 0:
+    status = 0
+    try:
+        shutil.rmtree(data_dir, ignore_errors=True)
+    except OSError:
         print 'Error in removing ~/.pimessage'
+        return 1
 
     # Remove daemon from .profile
     try:
@@ -349,7 +349,7 @@ def parse_opts(argv, edit_cmd):
             # stdout, show IP addresses
             try:
                 with open(data_dir+'contacts') as fname:
-                    sys.stdout.write(fname.read())
+                    print fname.read()
             except IOError:
                 print 'Unable to open contacts file'
                 ret = 2
@@ -497,16 +497,25 @@ def add_contact(name, ip_addr, overwrite):
 
 
     # add contact normally
-    add_string = name+'\t'+ip_addr+'\n'
-    with open(data_dir+'contacts', 'a') as fname:
-        fname.write(add_string)
+    add_string = name+'\t'+ip_addr
+    try:
+        with open(data_dir+'contacts', 'r') as fname:
+            my_lines = [entry.rstrip() for entry in fname.readlines()]
+    except IOError:
+        return 1
 
-    # use GNU sort
-    sort_cmd = 'sort -f '+data_dir+'contacts > '+data_dir+'sort_contacts'
-    os.system(sort_cmd)
+    my_lines.append(add_string)
+    my_lines.sort()
 
-    # overwrite old file
-    os.system('mv '+data_dir+'sort_contacts '+data_dir+'contacts')
+    # Take out empty strings
+    my_lines = [line for line in my_lines if line != '\n']
+
+    # Overwrite with sorted version
+    try:
+        with open(data_dir+'contacts', 'w') as fname:
+            fname.write('\n'.join(my_lines))
+    except IOError:
+        return 1
 
     return 0
 
@@ -626,7 +635,11 @@ def rm_convo(my_contact):
         print 'No conversation for', my_contact, 'could be found.'
         return 1
 
-    return os.system('rm '+conv_file)
+    try:
+        os.remove(conv_file)
+        return 0
+    except OSError:
+        return 1
 
 def send_message(my_contact, editor, text='', should_compose=True):
     """
@@ -740,7 +753,9 @@ def send_message(my_contact, editor, text='', should_compose=True):
             print 'failure in saving your message.'
 
         # clean up by removing old message to contact
-        if os.system('rm '+file_name):
+        try:
+            os.remove(file_name)
+        except OSError:
             print 'Error in removing message file.'
             exit(2)
     else:
@@ -781,8 +796,7 @@ def main(argv):
         exit(uninstall())
 
     script_name = argv[0]
-    dir_exists_cmd = 'test -d ' + data_dir
-    if os.system(dir_exists_cmd) != 0:
+    if not os.path.isdir(data_dir):
         install(script_name, data_dir)
 
     dir_files = subprocess.Popen(['ls', '-A', data_dir],
