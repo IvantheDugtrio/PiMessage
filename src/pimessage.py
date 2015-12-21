@@ -11,6 +11,7 @@ pi running raspbian OS.
 import subprocess   # for function calls
 import os
 import sys          # for arg parsing
+import shutil
 import time
 import socket       # for networking
 
@@ -176,7 +177,8 @@ def install(script_name, homedir):
 
 def uninstall():
     """Uninstaller for pimessage"""
-    status = os.system('rm -r -f '+data_dir)
+    # status = os.system('rm -r -f '+data_dir)
+    shutil.rmtree(data_dir, ignore_errors=True)
 
     if status != 0:
         print 'Error in removing ~/.pimessage'
@@ -328,24 +330,47 @@ def parse_opts(argv, edit_cmd):
         # contacts of the form:
         # Adam Smith\t1.2.3.4
         # Betty Rogers\t98.76.54.321
-        sock = opt2
         opt3 = grab_opt(argv, 3)
+        flag_list = list(opt2) + list(opt3) # parse all characters
+
+        a_flag = False
+        o_flag = False
+        for flag in flag_list:
+            if flag == '-':
+                pass
+            elif flag == 'a':
+                a_flag = True
+            elif flag == 'o':
+                o_flag = True
 
         # Display the contact list in less
-        if (sock == '-a' and opt3 == '-o') or (sock == '-o' and opt3 == '-a'):
+        ret = 0
+        if a_flag and o_flag:
             # stdout, show IP addresses
-            os.system('cat '+data_dir+'contacts')
-        elif sock == '-a' and opt3 != '-o':
+            try:
+                with open(data_dir+'contacts') as fname:
+                    sys.stdout.write(fname.read())
+            except IOError:
+                print 'Unable to open contacts file'
+                ret = 2
+
+        elif a_flag:
             # display in less, show IP addresses
-            os.system('less '+data_dir+'contacts')
-        elif sock == '-o' and opt3 != '-o':
+            ret = os.system('less '+data_dir+'contacts')
+        elif o_flag:
             # stdout, no IP addresses
-            os.system("sed 's/\t.*$//' " + data_dir+'contacts')
+            try:
+                with open(data_dir+'contacts') as fname:
+                    names = [line.split('\t')[0] for line in fname.readlines()]
+                    print '\n'.join(names)
+            except IOError:
+                print 'Unable to open contacts list'
+                ret = 1
         else:
             # display in less, no IP addresses
-            os.system("sed 's/\t.*$//' " + data_dir+'contacts | less')
+            ret = os.system("sed 's/\t.*$//' " + data_dir+'contacts | less')
 
-        exit(0)
+        exit(ret)
 
 
     elif opt1 == 'add':
@@ -400,7 +425,7 @@ def parse_opts(argv, edit_cmd):
             exit(1)
 
         if opt2 == 'editor':
-            if os.system('which '+opt3+' >/dev/null 2>&1') == 0:
+            if os.system('which '+opt3+' &>/dev/null') == 0:
                 with open(data_dir+'editor', 'w') as fname:
                     fname.write(opt3)
             else:

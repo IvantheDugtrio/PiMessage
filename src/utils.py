@@ -15,7 +15,7 @@ TUPLE_FAIL = (None, None)
 
 def get_home_dir():
     """Return home directory"""
-    return os.path.expanduser("~")
+    return os.path.expanduser('~')
 
 def ip_to_name(ip_addr):
     """
@@ -23,16 +23,14 @@ def ip_to_name(ip_addr):
     returns empty string on failure
     """
 
-    data_dir = os.path.join(get_home_dir(), ".pimessage/")
-    name = ""
-    with open(data_dir+"contacts") as fname:
+    name = ''
+    with open(os.path.join(get_home_dir(), '.pimessage', 'contacts')) as fname:
         for line in fname:
             rec = line.split('\t')
             if rec[1].rstrip('\n') == ip_addr:
                 name = rec[0]
                 break
 
-    #print "You're contacting %s" % name
     return name
 
 
@@ -48,10 +46,10 @@ def save_msg(msg_str, mode):
     lines = msg_str.split('\n')
 
     # strip off the message's metadata
-    oth_addr = ""
-    if mode == "rec":
+    oth_addr = ''
+    if mode == 'rec':
         oth_addr = lines[1]
-    elif mode == "send":
+    elif mode == 'send':
         oth_addr = lines[0]
     else:
         return TUPLE_FAIL
@@ -61,18 +59,18 @@ def save_msg(msg_str, mode):
 
     # find out who wrote this file
     contact = ip_to_name(oth_addr)
-    if contact == "":
+    if contact == '':
         contact = oth_addr
-    data_dir = os.path.join(get_home_dir(), ".pimessage/")
-    conv_file = data_dir+"conversations/"+contact+".conv"
-    if mode == "send":
-        contact = "You"
+    conv_file = os.path.join(get_home_dir(), '.pimessage', 'conversations',
+                             contact+'.conv')
+    if mode == 'send':
+        contact = 'You'
 
 
     # write the newly received message to disc
     try:
         with open(conv_file, 'a') as fname:
-            fname.write(contact+" wrote:\n")
+            fname.write(contact+' wrote:\n')
             for k in msg_data:
                 fname.write(k+'\n')
 
